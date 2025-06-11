@@ -125,6 +125,11 @@ export default function Chat() {
           className="flex-1 p-2 border rounded"
           disabled={loading}
         />
+        <input
+          type="date"
+          placeholder="Select Date of birth"
+          className="flex-1 p-2 border rounded"
+        />
         <button
           type="submit"
           disabled={loading}
