@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { generateResponse } from '@/lib/openai';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
@@ -12,16 +11,16 @@ export async function POST(req: Request) {
     const response = await generateResponse(message, "Your context here"); // We'll add proper context later
 
     // Store in database
-    const chat = await prisma.chat.create({
-      data: {
-        message,
-        response,
-      },
-    });
+    // const chat = await prisma.chat.create({
+    //   data: {
+    //     message,
+    //     response,
+    //   },
+    // });
 
     return NextResponse.json({ 
-      id: chat.id,
-      response: chat.response 
+        id: Math.random().toString(36).substring(2, 15),
+        response: response 
     });
   } catch (error) {
     console.error('Error in chat route:', error);

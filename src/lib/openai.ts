@@ -9,25 +9,18 @@ export const openai = new OpenAI({
 });
 
 export async function generateResponse(message: string, context: string) {
+  console.log("message", message);
+  console.log("context", context);
+  // console.log("openai", openai);
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: `You are TrueNorth, a vibrational intelligence system. 
-                   Use the following context to provide accurate, soul-aligned responses: ${context}`
-        },
-        {
-          role: "user",
-          content: message
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 500
-    });
+    const response = await openai.responses.create({
+      model: "gpt-4.1",
+      input: message,
+  });
+  
+  console.log(response.output_text);
 
-    return completion.choices[0].message.content;
+    return response.output_text;
   } catch (error) {
     console.error('Error generating response:', error);
     throw error;
