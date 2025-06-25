@@ -5,10 +5,14 @@ import { generateResponse } from '@/lib/openai';
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const { message, astroData, conversationHistory } = await req.json();
 
-    // Generate response using OpenAI
-    const response = await generateResponse(message, "Your context here"); // We'll add proper context later
+    // Generate response using OpenAI with astrology context
+    const response = await generateResponse(
+      message, 
+      conversationHistory ? `Previous conversation: ${JSON.stringify(conversationHistory.slice(-3))}` : undefined, // Keep last 3 messages for context
+      astroData
+    );
 
     // Store in database
     // const chat = await prisma.chat.create({

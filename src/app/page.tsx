@@ -3,7 +3,7 @@
 import AstroForm from './components/AstroForm';
 import AstroResults from './components/AstroResults';
 import { useState } from 'react';
-// import Chat from './components/Chat';
+import Chat from './components/Chat';
 
 interface AstroData {
   year: number;
@@ -127,7 +127,11 @@ export default function Home() {
             )}
           </div>
           <div className="w-1/2">
-            {/* <Chat /> */}
+          {
+            astroResult && (
+              <Chat astroData={astroResult} />
+            )
+          }
           </div>
         </div>
       </div>
