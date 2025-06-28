@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface AstroData {
   year: number;
@@ -20,10 +20,11 @@ interface AstroData {
 
 interface AstroFormProps {
   onSubmit: (data: AstroData) => void;
+  initialData?: Partial<AstroData>;
 }
 
-export default function AstroForm({ onSubmit }: AstroFormProps) {
-  const [formData, setFormData] = useState<AstroData>({
+export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
+  const defaultData: AstroData = {
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
     date: new Date().getDate(),
@@ -37,7 +38,27 @@ export default function AstroForm({ onSubmit }: AstroFormProps) {
       observation_point: 'topocentric',
       ayanamsha: 'lahiri'
     }
+  };
+
+  const [formData, setFormData] = useState<AstroData>({
+    ...defaultData,
+    ...initialData,
+    settings: {
+      ...defaultData.settings,
+      ...(initialData?.settings || {})
+    }
   });
+
+  // Update when initialData changes (e.g., when modal opens)
+  useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        ...initialData,
+        settings: { ...prev.settings, ...(initialData.settings || {}) }
+      }));
+    }
+  }, [initialData]);
 
   const handleInputChange = (field: keyof Omit<AstroData, 'settings'>, value: string | number) => {
     setFormData(prev => ({

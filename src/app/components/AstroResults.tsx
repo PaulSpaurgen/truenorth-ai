@@ -34,7 +34,6 @@ interface ApiResponse {
 
 interface AstroResultsProps {
   data: ApiResponse;
-  onBack: () => void;
 }
 
 const zodiacSigns = [
@@ -84,7 +83,7 @@ const isPlanet = (data: unknown): data is Planet => {
   );
 };
 
-export default function AstroResults({ data, onBack }: AstroResultsProps) {
+export default function AstroResults({ data }: AstroResultsProps) {
   // Extract planets from the first element of output array
   const planetsData = data.output[0];
   const planets: Planet[] = [];
@@ -98,15 +97,9 @@ export default function AstroResults({ data, onBack }: AstroResultsProps) {
   });
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 h-[80vh] overflow-y-auto">
+    <div className="bg-white rounded-lg shadow-lg p-6 \">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Planetary Positions</h2>
-        <button
-          onClick={onBack}
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
-        >
-          ← Back to Form
-        </button>
       </div>
       
       <div className="mb-4 p-3 bg-blue-50 rounded-lg">
