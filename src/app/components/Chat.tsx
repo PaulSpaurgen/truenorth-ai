@@ -157,13 +157,13 @@ export default function Chat({ astroData }: ChatProps) {
   return (
     <div className="flex flex-col h-full w-full max-w-[1400px] mx-auto p-4">
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-t-lg">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2">
           🌙◈ TrueNorth Astro-Design Oracle
         </h2>
         <p className="text-sm opacity-90">Your Astrology ✧ Human Design Guide</p>
       </div>
 
-      <div className="bg-white rounded-b-lg shadow-lg flex-1 flex flex-col">
+      <div className="bg-white rounded-b-lg shadow-lg flex-1 flex flex-col px-2 sm:px-4">
         {/* Messages Area */}
         <div className="flex-1 p-4 overflow-y-auto max-h-[500px] space-y-4">
           {messages.map((message) => (

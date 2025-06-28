@@ -1,25 +1,29 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
+/**
+ * Simple in-memory feedback handler (no database).
+ * Vercel functions are ephemeral, so this only logs the feedback and echoes it
+ * back to the client. Replace with a real persistence layer if needed later.
+ */
 export async function POST(req: Request) {
   try {
     const { chatId, type, comment } = await req.json();
 
-    const feedback = await prisma.feedback.create({
-      data: {
-        chatId,
-        type,
-        comment,
-      },
-    });
+    const feedback = {
+      id: Math.random().toString(36).substring(2, 9),
+      chatId,
+      type,
+      comment,
+      createdAt: new Date().toISOString(),
+    };
 
-    return NextResponse.json(feedback);
+    console.log('Feedback received:', feedback);
+
+    return NextResponse.json({ success: true, data: feedback });
   } catch (error) {
     console.error('Error in feedback route:', error);
     return NextResponse.json(
-      { error: 'Failed to process feedback' },
+      { success: false, error: 'Failed to process feedback' },
       { status: 500 }
     );
   }
