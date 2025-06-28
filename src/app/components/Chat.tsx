@@ -145,21 +145,22 @@ export default function Chat({ astroData }: ChatProps) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Blended Astro-HD starter questions
   const suggestedQuestions = [
-    "What does my birth chart reveal about my personality?",
-    "How do the current planetary transits affect me?",
-    "What are my strengths according to my chart?",
-    "Tell me about my moon sign and emotional nature",
-    "What career path suits my astrological profile?"
+    "What is my Human Design type and strategy?",
+    "Which gates are activated by my Sun and Moon placements?",
+    "How do my planetary positions interact with my design channels?",
+    "What does my profile say about my life path?",
+    "Which current transits are lighting up my gates right now?"
   ];
 
   return (
     <div className="flex flex-col h-full max-w-2xl mx-auto p-4">
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-t-lg">
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          🌙 TrueNorth Oracle
+          🌙◈ TrueNorth Astro-Design Oracle
         </h2>
-        <p className="text-sm opacity-90">Your AI Astrological Guide</p>
+        <p className="text-sm opacity-90">Your Astrology ✧ Human Design Guide</p>
       </div>
 
       <div className="bg-white rounded-b-lg shadow-lg flex-1 flex flex-col">

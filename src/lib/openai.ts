@@ -1,4 +1,5 @@
-import OpenAI from 'openai';
+import { OpenAI } from "openai";
+import { signDegreeToGate } from "./humandesign";
 
 interface AstroData {
   statusCode: number;
@@ -76,7 +77,15 @@ Planetary Positions:`;
               planetData.normDegree !== undefined) {
             const zodiacSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
             const signName = zodiacSigns[planetData.current_sign - 1] || 'Unknown';
-            systemPrompt += `\n- ${planetData.name}: ${planetData.normDegree.toFixed(2)}° in ${signName}${planetData.isRetro === 'true' ? ' (Retrograde)' : ''}`;
+
+            // Human Design gate calculation
+            try {
+              const gate = signDegreeToGate(planetData.current_sign, planetData.normDegree);
+              systemPrompt += `\n- ${planetData.name}: ${planetData.normDegree.toFixed(2)}° in ${signName} → Gate ${gate}${planetData.isRetro === 'true' ? ' (Retrograde)' : ''}`;
+            } catch {
+              // fallback without gate if calculation fails
+              systemPrompt += `\n- ${planetData.name}: ${planetData.normDegree.toFixed(2)}° in ${signName}${planetData.isRetro === 'true' ? ' (Retrograde)' : ''}`;
+            }
           }
         });
       }
