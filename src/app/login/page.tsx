@@ -17,11 +17,16 @@ export default function LoginPage() {
     }
   }, [user, loading, params, router]);
 
-  if (loading || user) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">Loading...</div>
     );
   }
+
+  // if (user) {
+  //   router.replace('/dashboard');
+  //   return null;
+  // }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">

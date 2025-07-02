@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-interface AstroData {
+export interface AstroData {
   year: number;
   month: number;
   date: number;

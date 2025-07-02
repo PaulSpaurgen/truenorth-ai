@@ -6,6 +6,10 @@ const UserSchema = new Schema(
     email: { type: String },
     name: String,
     photoURL: String,
+    astroDetails: {
+      type: Schema.Types.Mixed,
+      default: {}
+    }
   },
   { timestamps: true }
 );

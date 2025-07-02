@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/firebaseAdmin';
+import { dbConnect } from '@/lib/mongodb';
+import User from '@/models/User';
 
 // POST { idToken: string }
 export async function POST(req: Request) {
@@ -14,10 +16,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
+    await dbConnect();
+
+    const user = await User.findOne({ uid: decoded.uid });
+    const defaultUser = {
+      uid: decoded.uid,
+      email: decoded.email,
+      name: decoded.name,
+      photoURL: decoded.picture,
+      astroDetails: {},
+    }
+    if (!user) {
+      await User.create(defaultUser);
+    }
+
+
     // 5-day expiry (seconds)
     const expiresIn = 60 * 60 * 24 * 5;
 
-    const res = NextResponse.json({ success: true });
+    const res = NextResponse.json({ success: true, isNewUser: true });
     res.cookies.set('token', idToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -25,7 +42,6 @@ export async function POST(req: Request) {
       path: '/',
       sameSite: 'lax',
     });
-
     return res;
   } catch (err) {
     console.error('Error in sessionLogin:', err);

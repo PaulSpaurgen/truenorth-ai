@@ -1,4 +1,8 @@
+import { dbConnect } from '@/lib/mongodb';
+import { withAuth } from '@/lib/withAuth';
 import { NextResponse } from 'next/server';
+import User from '@/models/User';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 
 interface AstroData {
   year: number;
@@ -16,8 +20,10 @@ interface AstroData {
   };
 }
 
-export async function POST(req: Request) {
+export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
   try {
+    const uid = user.uid;
+
     const astroData: AstroData = await req.json();
     
     // Make request to Free Astrology API
@@ -35,6 +41,14 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json();
+    if (data) {
+      await dbConnect();
+      await User.updateOne(
+        { uid },
+        { $set: { astroDetails: data } },
+        { upsert: true }
+      );
+    }
     
     return NextResponse.json({
       success: true,
@@ -52,7 +66,7 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+});
 
 // Keep the GET method for backward compatibility
 export async function GET(req: Request) {

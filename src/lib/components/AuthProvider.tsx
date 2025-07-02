@@ -1,14 +1,18 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { User as FirebaseUser, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebaseClient';
+import { useRouter } from 'next/navigation';
+
+type AppUser = FirebaseUser & { astroDetails?: unknown };
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  isNewUser: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,8 +26,10 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -40,11 +46,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
       // Create session cookie on server
-      await fetch('/api/sessionLogin', {
+      const response = await fetch('/api/sessionLogin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken }),
       });
+      const data = await response.json();
+      if (data.isNewUser) {
+        setIsNewUser(true);
+        router.push('/onboarding');
+      } else {
+        setIsNewUser(false);
+        router.push('/dashboard');
+      }
+      setUser(data.user as AppUser);
     } catch (error) {
       console.error('Error signing in with Google:', error);
     }
@@ -63,8 +78,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     loading,
+    isNewUser,
     signInWithGoogle,
-    logout,
+    logout
   };
 
   return (

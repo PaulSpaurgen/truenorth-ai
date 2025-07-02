@@ -1,27 +1,15 @@
 "use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/components/AuthProvider';
+import Chat from '@/lib/components/Chat';
 
-export default function DashboardPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/login');
-    }
-  }, [loading, user, router]);
-
-  if (loading || !user) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
+export default function Dashboard() {
+  const { user } = useAuth();
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <h1 className="text-3xl font-bold">Welcome, {user.displayName || user.email}</h1>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <h1 className="text-3xl font-bold">Welcome, {user?.displayName || user?.email}</h1>
+      <Chat />
     </main>
   );
 }

@@ -9,44 +9,7 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
 }
-
-interface Planet {
-  name: string;
-  fullDegree: number;
-  normDegree: number;
-  current_sign: number;
-  isRetro: string;
-}
-
-interface PlanetData {
-  [key: string]: Planet | { name?: string; value?: number } | { observation_point?: string; ayanamsa?: string };
-}
-
-interface AstroResultData {
-  statusCode: number;
-  input: {
-    year: number;
-    month: number;
-    date: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-    latitude: number;
-    longitude: number;
-    timezone: number;
-    settings: {
-      observation_point: string;
-      ayanamsha: string;
-    };
-  };
-  output: PlanetData[];
-}
-
-interface ChatProps {
-  astroData?: AstroResultData;
-}
-
-export default function Chat({ astroData }: ChatProps) {
+export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -55,9 +18,7 @@ export default function Chat({ astroData }: ChatProps) {
 
   // Welcome message when component mounts
   useEffect(() => {
-    const welcomeMessage = astroData 
-      ? "🌟 Greetings! I can see your birth chart has been calculated. I'm TrueNorth, your cosmic guide. What would you like to explore about your astrological journey today?"
-      : "🌟 Welcome! I'm TrueNorth, your spiritual guide. To provide personalized astrological insights, please first generate your birth chart using the form on the left. How may I assist you on your cosmic journey?";
+    const welcomeMessage = "🌟 Welcome! I'm TrueNorth, your spiritual guide. To provide personalized astrological insights, please first generate your birth chart using the form on the left. How may I assist you on your cosmic journey?";
     
     setMessages([{
       id: 'welcome',
@@ -65,7 +26,7 @@ export default function Chat({ astroData }: ChatProps) {
       isUser: false,
       timestamp: new Date()
     }]);
-  }, [astroData]);
+  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -91,18 +52,10 @@ export default function Chat({ astroData }: ChatProps) {
     setMessages(prev => [...prev, newUserMessage]);
 
     try {
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-      const idToken = currentUser ? await currentUser.getIdToken() : null;
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
-        },
         body: JSON.stringify({ 
           message: userMessage,
-          astroData: astroData,
           conversationHistory: messages.slice(-6) // Send last 6 messages for context
         }),
       });
@@ -245,25 +198,10 @@ export default function Chat({ astroData }: ChatProps) {
         </div>
 
         {/* Suggested Questions */}
-        {messages.length <= 1 && !astroData && (
-          <div className="p-4 border-t bg-gray-50">
-            <p className="text-sm text-gray-600 mb-2">✨ Try asking:</p>
-            <div className="flex flex-wrap gap-2">
-              {suggestedQuestions.slice(0, 3).map((question, index) => (
-                <button
-                  key={index}
-                  onClick={() => setInput(question)}
-                  className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full hover:bg-purple-200 transition-colors"
-                >
-                  {question}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+      
 
         {/* Astrology-specific suggestions */}
-        {messages.length <= 1 && astroData && (
+        {messages.length <= 1 && (
           <div className="p-4 border-t bg-gradient-to-r from-purple-50 to-blue-50">
             <p className="text-sm text-purple-700 mb-2">🔮 Explore your chart:</p>
             <div className="flex flex-wrap gap-2">
