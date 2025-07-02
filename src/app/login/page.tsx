@@ -12,10 +12,10 @@ export default function LoginPage() {
   // If already signed in, redirect back
   useEffect(() => {
     if (!loading && user) {
-      const redirectPath = params.get('redirect') || '/';
+      const redirectPath = params.get('redirect') || '/dashboard';
       router.replace(redirectPath);
     }
-  }, []);
+  }, [loading, user, params, router]);
 
   if (loading) {
     return (

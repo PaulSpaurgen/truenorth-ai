@@ -7,9 +7,9 @@ export type RouteHandlerWithUser = (req: Request, user: DecodedIdToken) => Promi
 /**
  * Higher-order helper that ensures the request passed the global auth middleware.
  * Usage:
- *   export const POST = withAuth(async (req) => { ... })
+ *   export const POST = withAuth(async (req, user) => { ... })
  */
-export function withAuth(handler: RouteHandlerWithUser): RouteHandlerWithUser {
+export function withAuth(handler: RouteHandlerWithUser) {
   return async function authWrapped(req: Request): Promise<Response> {
     try {
       const cookieHeader = req.headers.get('cookie') || '';
@@ -27,5 +27,5 @@ export function withAuth(handler: RouteHandlerWithUser): RouteHandlerWithUser {
       console.error('withAuth error:', error);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-  } as unknown as RouteHandlerWithUser;
+  };
 } 
