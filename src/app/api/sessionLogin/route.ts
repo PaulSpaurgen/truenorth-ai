@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     // 5-day expiry (seconds)
     const expiresIn = 60 * 60 * 24 * 5;
 
-    const res = NextResponse.json({ success: true, isNewUser: true });
+    const res = NextResponse.json({ success: true, isNewUser: !user });
     res.cookies.set('token', idToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

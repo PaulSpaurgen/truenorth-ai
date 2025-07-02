@@ -13,6 +13,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isNewUser: boolean;
+  setIsNewUser: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,12 +34,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+      setUser(user as AppUser);
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (loading) return;
+    
+    if (user) {
+      if (isNewUser) {
+        router.push('/onboarding');
+      } else {
+        router.push('/dashboard');
+      }
+    } else {
+      router.push('/login');
+    }
+  }, [user, loading, isNewUser, router]);
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
@@ -54,12 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
       if (data.isNewUser) {
         setIsNewUser(true);
-        router.push('/onboarding');
       } else {
         setIsNewUser(false);
-        router.push('/dashboard');
       }
-      setUser(data.user as AppUser);
     } catch (error) {
       console.error('Error signing in with Google:', error);
     }
@@ -80,7 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     isNewUser,
     signInWithGoogle,
-    logout
+    logout,
+    setIsNewUser,
   };
 
   return (

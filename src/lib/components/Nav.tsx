@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { signOut } from "firebase/auth";
 import { useAuth } from "./AuthProvider";
 // import Link from "next/link";
@@ -8,19 +8,23 @@ import { useRouter } from "next/navigation";
 export default function Nav() {
   const router = useRouter();
   const { user } = useAuth();
-  
-  if (!user) {
-    return null;
-  }
+
   const handleSignOut = async () => {
     await signOut(auth);
-    router.push("/");
-  }
-  return <div>
-    <div className="flex justify-between items-center p-4">
-        {/* <Link href="/dashboard">Dashboard</Link> */}
+    router.push("/login");
+  };
 
-        <button onClick={handleSignOut}>Sign Out</button>
+  return (
+    <div>
+      <div className="fixed top-0 left-0 right-0 flex justify-between items-center p-4">
+        {/* <Link href="/dashboard">Dashboard</Link> */}
+        {user && (
+          <div>
+            <p>{user?.displayName}</p>
+          </div>
+        )}
+        {user && <button onClick={handleSignOut}>Sign Out</button>}
+      </div>
     </div>
-  </div>;
+  );
 }

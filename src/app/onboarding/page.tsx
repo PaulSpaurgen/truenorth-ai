@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import AstroForm, { AstroData } from "@/lib/components/AstroForm";
 
 export default function Onboarding() {
-  const { isNewUser } = useAuth();
+  const { isNewUser, setIsNewUser } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (data: AstroData) => {
@@ -20,7 +20,8 @@ export default function Onboarding() {
     const res = await response.json();
 
     if (res.success) {
-        router.push('/dashboard');
+      setIsNewUser(false);
+      router.push('/dashboard');
     }
   }
 

@@ -1,10 +1,17 @@
 "use client";
 
-import { useAuth } from '@/lib/components/AuthProvider';
+import { useAuth  } from '@/lib/components/AuthProvider';
+import { useEffect } from 'react';
 import Chat from '@/lib/components/Chat';
 
 export default function Dashboard() {
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      console.log("user", user);
+    }
+  }, [user]);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
