@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useAuth } from './AuthProvider';
 
 export default function UserMenu() {
@@ -16,10 +17,12 @@ export default function UserMenu() {
         className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
       >
         {user.photoURL ? (
-          <img
+          <Image
             src={user.photoURL}
             alt={user.displayName || 'User'}
-            className="w-8 h-8 rounded-full"
+            width={32}
+            height={32}
+            className="rounded-full"
           />
         ) : (
           <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-medium">

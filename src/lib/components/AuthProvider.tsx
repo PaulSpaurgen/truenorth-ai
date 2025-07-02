@@ -37,7 +37,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      // Create session cookie on server
+      await fetch('/api/sessionLogin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      });
     } catch (error) {
       console.error('Error signing in with Google:', error);
     }
@@ -46,6 +53,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await signOut(auth);
+      // Clear session cookie on server
+      await fetch('/api/sessionLogout', { method: 'POST' });
     } catch (error) {
       console.error('Error signing out:', error);
     }

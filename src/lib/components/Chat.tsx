@@ -91,9 +91,15 @@ export default function Chat({ astroData }: ChatProps) {
     setMessages(prev => [...prev, newUserMessage]);
 
     try {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      const idToken = currentUser ? await currentUser.getIdToken() : null;
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify({ 
           message: userMessage,
           astroData: astroData,
