@@ -3,8 +3,11 @@
 import AstroForm from "./components/AstroForm";
 import AstroResults from "./components/AstroResults";
 import Modal from "./components/Modal";
+import LoginModal from "./components/LoginModal";
+import UserMenu from "./components/UserMenu";
 import { useState, useEffect } from "react";
 import Chat from "./components/Chat";
+import { useAuth } from "./components/AuthProvider";
 
 interface AstroData {
   year: number;
@@ -58,11 +61,23 @@ interface AstroResultData {
 }
 
 export default function Home() {
+  const { user, loading: authLoading } = useAuth();
   const [astroResult, setAstroResult] = useState<AstroResultData | null>(null);
   const [savedInput, setSavedInput] = useState<AstroData | null>(null);
   const [modal, setModal] = useState<null | "form" | "results">(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Show login modal after a delay if user is not signed in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      const timer = setTimeout(() => {
+        setShowLoginModal(true);
+      }, 2000); // Show after 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [user, authLoading]);
 
   const handleAstroSubmit = async (data: AstroData) => {
     setLoading(true);
@@ -112,12 +127,38 @@ export default function Home() {
     setError(null);
   };
 
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading TrueNorth...</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-gray-100 py-8">
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 px-2 md:px-0">
-          TrueNorth - Vibrational Intelligence
-        </h1>
+        {/* Header with user menu */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold px-2 md:px-0">
+            TrueNorth - Vibrational Intelligence
+          </h1>
+          <div className="flex items-center gap-4">
+            {!user && (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors"
+              >
+                Sign In
+              </button>
+            )}
+            <UserMenu />
+          </div>
+        </div>
+
         <div className="w-full">
             {!astroResult && (
               <AstroForm onSubmit={handleAstroSubmit} initialData={savedInput || undefined} />
@@ -145,7 +186,7 @@ export default function Home() {
           </div>
         {astroResult && (
             <div className="w-full">
-              <div className="flex  gap-4">
+              <div className="flex gap-4">
                 <button onClick={()=>setModal("form")} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"> View Form</button>
                 <button onClick={()=>setModal("results")} className="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"> View Results</button>
               </div>
@@ -177,6 +218,12 @@ export default function Home() {
             )
           )}
         </Modal>
+
+        {/* Login Modal */}
+        <LoginModal 
+          isOpen={showLoginModal} 
+          onClose={() => setShowLoginModal(false)} 
+        />
       </div>
     </main>
   );

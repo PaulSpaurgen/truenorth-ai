@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { getAuth } from 'firebase/auth';
 
 interface Message {
   id: string;
@@ -131,9 +132,16 @@ export default function Chat({ astroData }: ChatProps) {
 
   const handleFeedback = async (messageId: string, type: 'like' | 'dislike' | 'correction') => {
     try {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      const idToken = currentUser ? await currentUser.getIdToken() : null;
+      
       await fetch('/api/feedback', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+        },
         body: JSON.stringify({ chatId: messageId, type }),
       });
     } catch (error) {

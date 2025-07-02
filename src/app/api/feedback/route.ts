@@ -1,25 +1,41 @@
 import { NextResponse } from 'next/server';
+import { verifyAuthToken } from '@/lib/firebaseAdmin';
+import { dbConnect } from '@/lib/mongodb';
+import Message from '@/models/Message';
 
 /**
- * Simple in-memory feedback handler (no database).
- * Vercel functions are ephemeral, so this only logs the feedback and echoes it
- * back to the client. Replace with a real persistence layer if needed later.
+ * Stores feedback in the corresponding Message document.
  */
 export async function POST(req: Request) {
   try {
+    // Check auth
+    const authHeader = req.headers.get('authorization') || '';
+    const match = authHeader.match(/^Bearer (.*)$/i);
+    if (!match) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decoded = await verifyAuthToken(match[1]);
+    if (!decoded) {
+      return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
+    }
+
     const { chatId, type, comment } = await req.json();
 
-    const feedback = {
-      id: Math.random().toString(36).substring(2, 9),
-      chatId,
-      type,
-      comment,
-      createdAt: new Date().toISOString(),
-    };
+    await dbConnect();
 
-    console.log('Feedback received:', feedback);
+    await Message.findByIdAndUpdate(chatId, {
+      $push: {
+        feedback: {
+          userId: decoded.uid,
+          type,
+          comment,
+          createdAt: new Date(),
+        },
+      },
+    });
 
-    return NextResponse.json({ success: true, data: feedback });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error in feedback route:', error);
     return NextResponse.json(

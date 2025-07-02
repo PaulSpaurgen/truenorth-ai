@@ -1,31 +1,58 @@
 import { NextResponse } from 'next/server';
 import { generateResponse } from '@/lib/openai';
+import { verifyAuthToken } from '@/lib/firebaseAdmin';
+import { dbConnect } from '@/lib/mongodb';
+import User from '@/models/User';
+import Message from '@/models/Message';
 
 // const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
+    // 1. Verify Firebase ID token
+    const authHeader = req.headers.get('authorization') || '';
+    const tokenMatch = authHeader.match(/^Bearer (.*)$/i);
+    if (!tokenMatch) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decoded = await verifyAuthToken(tokenMatch[1]);
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const { message, astroData, conversationHistory } = await req.json();
 
-    // Generate response using OpenAI with astrology context
-    const response = await generateResponse(
-      message, 
-      conversationHistory ? `Previous conversation: ${JSON.stringify(conversationHistory.slice(-3))}` : undefined, // Keep last 3 messages for context
+    // 2. Ensure DB connection and user document
+    await dbConnect();
+
+    let userDoc = await User.findOne({ uid: decoded.uid });
+    if (!userDoc) {
+      userDoc = await User.create({
+        uid: decoded.uid,
+        email: decoded.email,
+        name: decoded.name,
+        photoURL: decoded.picture,
+      });
+    }
+
+    // 3. Generate AI response
+    const responseText = await generateResponse(
+      message,
+      conversationHistory
+        ? `Previous conversation: ${JSON.stringify(conversationHistory.slice(-3))}`
+        : undefined,
       astroData
     );
 
-    // Store in database
-    // const chat = await prisma.chat.create({
-    //   data: {
-    //     message,
-    //     response,
-    //   },
-    // });
-
-    return NextResponse.json({ 
-        id: Math.random().toString(36).substring(2, 15),
-        response: response 
+    // 4. Persist message pair
+    const saved = await Message.create({
+      userId: decoded.uid,
+      userMessage: message,
+      aiResponse: responseText,
     });
+
+    return NextResponse.json({ id: saved._id.toString(), response: responseText });
   } catch (error) {
     console.error('Error in chat route:', error);
     return NextResponse.json(
