@@ -39,9 +39,7 @@ export const openai = new OpenAI({
 });
 
 export async function generateResponse(message: string, context?: string, astroData?: AstroData) {
-  console.log("User message:", message);
-  console.log("Context:", context);
-  console.log("Astro data available:", !!astroData);
+ 
   
   try {
     // Build the system prompt based on available context

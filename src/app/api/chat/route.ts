@@ -1,36 +1,52 @@
-import { NextResponse } from 'next/server';
-import { generateResponse } from '@/lib/openai';
+import { NextResponse } from "next/server";
+import { generateResponse } from "@/lib/openai";
+import { dbConnect } from "@/lib/mongodb";
+import { withAuth } from "@/lib/withAuth";
+import User from "@/models/User";
+import Message from "@/models/Message";
+import type { DecodedIdToken } from "firebase-admin/auth";
 
 // const prisma = new PrismaClient();
 
-export async function POST(req: Request) {
+export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
   try {
-    const { message, astroData, conversationHistory } = await req.json();
+    const uid = user.uid;
 
-    // Generate response using OpenAI with astrology context
-    const response = await generateResponse(
-      message, 
-      conversationHistory ? `Previous conversation: ${JSON.stringify(conversationHistory.slice(-3))}` : undefined, // Keep last 3 messages for context
+    const { message, conversationHistory } = await req.json();
+
+    // Ensure DB connection and user document
+    await dbConnect();
+
+    const userData = await User.findOne({ uid });
+    const astroData = userData?.astroDetails;
+
+    // Generate AI response
+    const responseText = await generateResponse(
+      message,
+      conversationHistory
+        ? `Previous conversation: ${JSON.stringify(
+            conversationHistory.slice(-3)
+          )}`
+        : undefined,
       astroData
     );
 
-    // Store in database
-    // const chat = await prisma.chat.create({
-    //   data: {
-    //     message,
-    //     response,
-    //   },
-    // });
+    // Persist message pair
+    const saved = await Message.create({
+      userId: uid,
+      userMessage: message,
+      aiResponse: responseText,
+    });
 
-    return NextResponse.json({ 
-        id: Math.random().toString(36).substring(2, 15),
-        response: response 
+    return NextResponse.json({
+      id: saved._id.toString(),
+      response: responseText,
     });
   } catch (error) {
-    console.error('Error in chat route:', error);
+    console.error("Error in chat route:", error);
     return NextResponse.json(
-      { error: 'Failed to process chat message' },
+      { error: "Failed to process chat message" },
       { status: 500 }
     );
   }
-} 
+});
