@@ -54,13 +54,11 @@ export default function Chat() {
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        credentials: 'include', // ensure auth cookie is sent even in production
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',      //  ←  make the browser attach the token
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage,
-          conversationHistory: messages.slice(-6), // Send last 6 messages for context
+          conversationHistory: messages.slice(-6),
         }),
       });
 
