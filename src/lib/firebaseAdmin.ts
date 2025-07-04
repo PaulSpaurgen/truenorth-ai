@@ -19,12 +19,27 @@ if (!admin.apps.length) {
   });
 }
 
-export async function verifyAuthToken(idToken: string) {
+export async function verifyAuthToken(token: string) {
   try {
-    const decoded = await admin.auth().verifyIdToken(idToken);
-    return decoded; // contains uid, email, etc.
+    console.log('verifyAuthToken: Starting token verification, token length:', token.length);
+    console.log('verifyAuthToken: Token starts with:', token.substring(0, 20) + '...');
+    
+    // First try to verify as a session cookie
+    try {
+      const decoded = await admin.auth().verifySessionCookie(token, true);
+      console.log('verifyAuthToken: Session cookie verified successfully for user:', decoded.uid);
+      return decoded;
+    } catch {
+      console.log('verifyAuthToken: Not a session cookie, trying as ID token...');
+      
+      // If session cookie verification fails, try as ID token
+      const decoded = await admin.auth().verifyIdToken(token);
+      console.log('verifyAuthToken: ID token verified successfully for user:', decoded.uid);
+      return decoded;
+    }
   } catch (err) {
-    console.error('Error verifying Firebase ID token:', err);
+    console.error('Error verifying Firebase token:', err);
+    console.error('Token that failed verification:', token.substring(0, 50) + '...');
     return null;
   }
 } 
