@@ -54,11 +54,13 @@ export default function Chat() {
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        credentials: 'include',      //  ←  make the browser attach the token
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        credentials: 'include', // ensure auth cookie is sent
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
           message: userMessage,
-          conversationHistory: messages.slice(-6),
+          conversationHistory: messages.slice(-6) // Send last 6 messages for context
         }),
       });
 
@@ -93,20 +95,114 @@ export default function Chat() {
 
   const handleFeedback = async (messageId: string, type: 'like' | 'dislike' | 'correction') => {
     try {
+      let comment = '';
+      
+      // Ask for comment if it's a dislike or correction
+      if (type === 'dislike' || type === 'correction') {
+        comment = prompt(
+          type === 'dislike' 
+            ? 'What could be improved about this response?' 
+            : 'What correction would you like to suggest?'
+        ) || '';
+      }
+
       const auth = getAuth();
       const currentUser = auth.currentUser;
       const idToken = currentUser ? await currentUser.getIdToken() : null;
       
+      // Submit feedback to backend
       await fetch('/api/feedback', {
         method: 'POST',
+        credentials: 'include',
         headers: { 
           'Content-Type': 'application/json',
           ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
         },
-        body: JSON.stringify({ chatId: messageId, type }),
+        body: JSON.stringify({ 
+          chatId: messageId, 
+          type,
+          comment: comment.trim() || undefined
+        }),
       });
+
+      // Create feedback message for the chat
+      let feedbackMessage = '';
+      switch (type) {
+        case 'like':
+          feedbackMessage = '👍 I found this response helpful!';
+          break;
+        case 'dislike':
+          feedbackMessage = `👎 This response could be improved${comment ? `: ${comment}` : '.'}`;
+          break;
+        case 'correction':
+          feedbackMessage = `✏️ I'd like to suggest a correction${comment ? `: ${comment}` : '.'}`;
+          break;
+      }
+
+      // Add feedback as user message
+      const feedbackUserMessage: Message = {
+        id: Date.now().toString(),
+        content: feedbackMessage,
+        isUser: true,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, feedbackUserMessage]);
+
+      // Only get AI response for negative feedback or corrections
+      if (type === 'dislike' || type === 'correction') {
+        setIsTyping(true);
+        
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              message: feedbackMessage,
+              conversationHistory: messages.slice(-3) // Limited context for feedback
+            }),
+          });
+
+          const data = await response.json();
+          
+          // Add AI response to feedback
+          setTimeout(() => {
+            setIsTyping(false);
+            setMessages(prev => [...prev, {
+              id: data.id,
+              content: data.response,
+              isUser: false,
+              timestamp: new Date()
+            }]);
+          }, 500 + Math.random() * 500); // Shorter delay for feedback responses
+
+        } catch (error) {
+          console.error('Error getting AI feedback response:', error);
+          setIsTyping(false);
+          setMessages(prev => [...prev, { 
+            id: Date.now().toString(), 
+            content: 'Thank you for your feedback! I\'ll work on improving my responses.', 
+            isUser: false,
+            timestamp: new Date()
+          }]);
+        }
+      } else {
+        // For likes, just add a simple acknowledgment
+        setTimeout(() => {
+          setMessages(prev => [...prev, { 
+            id: Date.now().toString(), 
+            content: '✨ Thank you for the positive feedback! It helps me understand what works well.', 
+            isUser: false,
+            timestamp: new Date()
+          }]);
+        }, 500);
+      }
+      
     } catch (error) {
       console.error('Error submitting feedback:', error);
+      alert('Failed to submit feedback. Please try again.');
     }
   };
 
