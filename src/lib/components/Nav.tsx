@@ -22,9 +22,14 @@ export default function Nav() {
             Dashboard
           </Link>
           {user && (
-            <Link href="/analytics" className="text-purple-600 hover:text-purple-800 font-medium">
-              Analytics
-            </Link>
+            <>
+              <Link href="/profile" className="text-purple-600 hover:text-purple-800 font-medium">
+                Profile
+              </Link>
+              <Link href="/analytics" className="text-purple-600 hover:text-purple-800 font-medium">
+                Analytics
+              </Link>
+            </>
           )}
         </div>
         {user && (
