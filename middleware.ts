@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  // Protect all API routes and any dashboard pages
+  // Extract pathname once
   const { pathname } = req.nextUrl;
-  const isProtected = pathname.startsWith('/api') || pathname.startsWith('/dashboard');
+
+  // Public endpoints that should bypass auth (e.g. login / logout)
+  const isPublicApi = pathname.startsWith('/api/sessionLogin') || pathname.startsWith('/api/sessionLogout');
+
+  // Only enforce auth for protected paths (all API & dashboard) *except* the public ones above
+  const isProtected = (pathname.startsWith('/api') && !isPublicApi) || pathname.startsWith('/dashboard');
+
   if (!isProtected) return NextResponse.next();
 
   // Read token issued during /api/sessionLogin
