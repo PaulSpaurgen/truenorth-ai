@@ -22,13 +22,13 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
 
     // Generate AI response
     const responseText = await generateResponse(
-      message,
       conversationHistory
-        ? `Previous conversation: ${JSON.stringify(
+        ? `${message}\n\nPrevious conversation: ${JSON.stringify(
             conversationHistory.slice(-3)
           )}`
-        : undefined,
-      astroData
+        : message,
+      astroData,
+      false // isHumanDesign = false for regular chat
     );
 
     // Persist message pair
