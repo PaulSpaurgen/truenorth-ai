@@ -47,7 +47,9 @@ export interface ProfileData {
       };
     }>;
   };
-  synthesis: string;
+  astroSummary: string;
+  humanDesignSummary: string;
+  cumulativeSummary: string;
   generatedAt: string;
   nextUpdate: string;
 }
@@ -66,21 +68,35 @@ const getCurrentDateInTimezone = (timezoneOffset: number): string => {
  * Fetch profile data from API
  */
 const fetchProfileData = async (): Promise<ProfileData> => {
-  const response = await fetch('/api/profile', {
-    method: 'GET',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  // Fetch base profile (natal details, dates)
+  const baseRes = await fetch('/api/profile');
+  if (!baseRes.ok) {
+    const err = await baseRes.json();
+    throw new Error(err.error || 'Failed to fetch profile');
+  }
+  const baseJson = await baseRes.json();
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to fetch profile');
+  // Fetch summaries in parallel
+  const [astroRes, hdRes, cumulativeRes] = await Promise.all([
+    fetch('/api/summary/astro'),
+    fetch('/api/summary/human-design'),
+    fetch('/api/summary/cumulative'),
+  ]);
+
+  if (!astroRes.ok || !hdRes.ok || !cumulativeRes.ok) {
+    throw new Error('Failed to fetch summaries');
   }
 
-  const data = await response.json();
-  return data.profile;
+  const astroJson = await astroRes.json();
+  const hdJson = await hdRes.json();
+  const cumulativeJson = await cumulativeRes.json();
+
+  return {
+    ...baseJson.profile,
+    astroSummary: astroJson.summary,
+    humanDesignSummary: hdJson.summary,
+    cumulativeSummary: cumulativeJson.summary,
+  } as ProfileData;
 };
 
 /**
@@ -103,7 +119,7 @@ export const useProfileQuery = () => {
     queryFn: fetchProfileData,
     enabled: !!user, // Only run query if user is authenticated
     staleTime: 1000 * 60 * 60 * 12, // 12 hours - data is fresh for half a day
-    gcTime: 1000 * 60 * 60 * 24, // 24 hours - keep in cache for a full day
+    gcTime: 0, // 24 hours - keep in cache for a full day
     refetchOnWindowFocus: false, // Don't refetch on window focus
     refetchOnMount: false, // Don't refetch on component mount if data exists
     retry: (failureCount, error) => {
