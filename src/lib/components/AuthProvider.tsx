@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User as FirebaseUser, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebaseClient';
 import { useRouter } from 'next/navigation';
+import { AstroData } from './AstroForm';
 
 type AppUser = FirebaseUser & { astroDetails?: unknown };
 
@@ -14,6 +15,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isNewUser: boolean;
   setIsNewUser: (value: boolean) => void;
+  astroDetails: AstroData | null;
+  setAstroDetails: (value: AstroData) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
+  const [astroDetails, setAstroDetails] = useState<AstroData | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -71,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsNewUser(true);
       } else {
         setIsNewUser(false);
+        setAstroDetails(data.astroDetails);
       }
     } catch (error) {
       console.error('Error signing in with Google:', error);
@@ -94,6 +99,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithGoogle,
     logout,
     setIsNewUser,
+    astroDetails,
+    setAstroDetails,
   };
 
   return (

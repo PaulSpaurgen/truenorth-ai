@@ -41,12 +41,13 @@ export async function POST(req: Request) {
 
     // Create a session cookie that lasts 5 days
     const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days in milliseconds
+    const isNewUser = !user || !Object.keys(user.astroDetails).length;
     
     try {
       const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn });
       console.log('sessionLogin: Session cookie created successfully');
       
-      const res = NextResponse.json({ success: true, isNewUser: !user });
+      const res = NextResponse.json({ success: true, isNewUser });
       res.cookies.set('token', sessionCookie, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
     } catch (sessionError) {
       console.error('Error creating session cookie:', sessionError);
       // Fallback to storing the ID token directly (with shorter expiry)
-      const res = NextResponse.json({ success: true, isNewUser: !user });
+      const res = NextResponse.json({ success: true, isNewUser });
       res.cookies.set('token', idToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

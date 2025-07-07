@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from './AuthProvider';
 
 export interface AstroData {
   year: number;
@@ -23,7 +24,15 @@ interface AstroFormProps {
   initialData?: Partial<AstroData>;
 }
 
+interface LocationSuggestion {
+  display_name: string;
+  lat: string;
+  lon: string;
+  place_id: string;
+}
+
 export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
+  const { user } = useAuth();
   const defaultData: AstroData = {
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
@@ -49,6 +58,13 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
     }
   });
 
+  // Location search state
+  const [locationQuery, setLocationQuery] = useState('');
+  const [locationSuggestions, setLocationSuggestions] = useState<LocationSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+
   // Update when initialData changes (e.g., when modal opens)
   useEffect(() => {
     if (initialData) {
@@ -60,20 +76,32 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
     }
   }, [initialData]);
 
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.location-search-container')) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Cleanup search timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
+
   const handleInputChange = (field: keyof Omit<AstroData, 'settings'>, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: typeof value === 'string' ? parseFloat(value) || 0 : value
-    }));
-  };
-
-  const handleSettingsChange = (field: keyof AstroData['settings'], value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      settings: {
-        ...prev.settings,
-        [field]: value
-      }
     }));
   };
 
@@ -82,34 +110,81 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
     onSubmit(formData);
   };
 
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFormData(prev => ({
-            ...prev,
-            latitude: parseFloat(position.coords.latitude.toFixed(5)),
-            longitude: parseFloat(position.coords.longitude.toFixed(5))
-          }));
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          alert('Unable to get current location. Please enter manually.');
-        }
+  // Get current timezone offset in hours
+  const getTimezoneOffset = () => {
+    const now = new Date();
+    return -now.getTimezoneOffset() / 60; // Convert minutes to hours and flip sign
+  };
+
+  // Search for locations using Nominatim API
+  const searchLocations = async (query: string) => {
+    if (query.length < 3) {
+      setLocationSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
       );
-    } else {
-      alert('Geolocation is not supported by this browser.');
+      const data = await response.json();
+      setLocationSuggestions(data);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error('Error searching locations:', error);
+      setLocationSuggestions([]);
+    } finally {
+      setIsSearching(false);
     }
   };
 
+  // Handle location search input
+  const handleLocationSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setLocationQuery(query);
+    
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // Debounce the search
+    const timeoutId = setTimeout(() => {
+      searchLocations(query);
+    }, 300);
+    
+    setSearchTimeout(timeoutId);
+  };
+
+  // Handle location selection
+  const handleLocationSelect = (location: LocationSuggestion) => {
+    const lat = parseFloat(location.lat);
+    const lon = parseFloat(location.lon);
+    
+    setFormData(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lon,
+      timezone: getTimezoneOffset(),
+    }));
+    
+    setLocationQuery(location.display_name);
+    setShowSuggestions(false);
+    setLocationSuggestions([]);
+  };
+
+ 
+
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Birth Details</h2>
+    <div className="bg-white rounded-lg shadow-lg p-6 mt-40 mx-auto max-w-2xl">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Hello {user?.displayName}</h2>
+      <p className="text-sm text-gray-600 mb-6">Please enter your birth details to get started</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         
         {/* Date and Time Section */}
         <div className="grid grid-cols-1 gap-4">
-          <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Date & Time</h3>
           
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -152,136 +227,50 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
               />
             </div>
           </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Hours</label>
-              <input
-                type="number"
-                min="0"
-                max="23"
-                value={formData.hours}
-                onChange={(e) => handleInputChange('hours', parseInt(e.target.value))}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Minutes</label>
-              <input
-                type="number"
-                min="0"
-                max="59"
-                value={formData.minutes}
-                onChange={(e) => handleInputChange('minutes', parseInt(e.target.value))}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Seconds</label>
-              <input
-                type="number"
-                min="0"
-                max="59"
-                value={formData.seconds}
-                onChange={(e) => handleInputChange('seconds', parseInt(e.target.value))}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
         </div>
 
         {/* Location Section */}
         <div className="grid grid-cols-1 gap-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Location</h3>
-            <button
-              type="button"
-              onClick={getCurrentLocation}
-              className="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition-colors"
-            >
-              📍 Current Location
-            </button>
+          
+          {/* Location Search */}
+          <div className="relative location-search-container">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Search for a place (City, State, Country)
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={locationQuery}
+                onChange={handleLocationSearch}
+                placeholder="e.g., New York City, New York, United States"
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {isSearching && (
+                <div className="absolute right-3 top-2.5">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                </div>
+              )}
+            </div>
+            
+            {/* Location Suggestions Dropdown */}
+            {showSuggestions && locationSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                {locationSuggestions.map((location) => (
+                  <button
+                    key={location.place_id}
+                    type="button"
+                    onClick={() => handleLocationSelect(location)}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="text-sm text-gray-800 truncate">
+                      {location.display_name}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Latitude</label>
-              <input
-                type="number"
-                step="0.00001"
-                min="-90"
-                max="90"
-                value={formData.latitude}
-                onChange={(e) => handleInputChange('latitude', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="17.38333"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Longitude</label>
-              <input
-                type="number"
-                step="0.00001"
-                min="-180"
-                max="180"
-                value={formData.longitude}
-                onChange={(e) => handleInputChange('longitude', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="78.4666"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Timezone (UTC offset)</label>
-            <input
-              type="number"
-              step="0.5"
-              min="-12"
-              max="14"
-              value={formData.timezone}
-              onChange={(e) => handleInputChange('timezone', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="5.5"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Settings Section */}
-        <div className="grid grid-cols-1 gap-4">
-          <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Calculation Settings</h3>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Observation Point</label>
-              <select
-                value={formData.settings.observation_point}
-                onChange={(e) => handleSettingsChange('observation_point', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="topocentric">Topocentric</option>
-                <option value="geocentric">Geocentric</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Ayanamsha</label>
-              <select
-                value={formData.settings.ayanamsha}
-                onChange={(e) => handleSettingsChange('ayanamsha', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="lahiri">Lahiri</option>
-                <option value="raman">Raman</option>
-                <option value="krishnamurti">Krishnamurti</option>
-                <option value="sayan">Sayan</option>
-              </select>
-            </div>
-          </div>
         </div>
 
         <button
