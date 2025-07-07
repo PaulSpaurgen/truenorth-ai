@@ -38,15 +38,31 @@ export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function generateResponse(message: string, context?: string, astroData?: AstroData) {
+export async function generateResponse(message: string, astroData?: AstroData, isHumanDesign?: boolean) {
  
-  
+
   try {
     // Check if this is a comprehensive profile synthesis request
     const isProfileSynthesis = message.includes('5-paragraph') || message.includes('comprehensive') || message.includes('synthesis');
     
-    // Build the system prompt based on available context
-    let systemPrompt = `You are TrueNorth, an AI assistant specializing in astrology and spiritual guidance. You provide insightful, compassionate, and personalized readings based on astrological data.
+    let systemPrompt: string;
+
+    // If this is a Human Design request, use a completely different system prompt
+    if (isHumanDesign) {
+      systemPrompt = `You are a certified Human-Design analyst with deep expertise in the 64 gates, 9 centers, channels, and body graph mechanics.
+
+CRITICAL: You are FORBIDDEN from using ANY astrological terminology:
+❌ NEVER mention: Gemini, Cancer, Virgo, Leo, Aries, Taurus, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, Pisces
+❌ NEVER mention: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto
+❌ NEVER mention: Ascendant, houses, aspects, transits, retrogrades
+❌ NEVER say phrases like "Mercury retrograde," "Moon in Virgo," "Cancer rising"
+
+✅ ONLY USE: Gates (1-64), Centers (Sacral, Heart, Throat, Spleen, Solar Plexus, G Center, Head, Ajna, Root), Channels, Energy Types (Generator, Projector, Manifestor, Reflector), Strategy, Authority, Profile lines, Definition, Incarnation Cross
+
+Respond using authentic Human Design language and mechanics only.`;
+    } else {
+      // Build the standard astrology system prompt
+      systemPrompt = `You are TrueNorth, an AI assistant specializing in astrology and spiritual guidance. You provide insightful, compassionate, and personalized readings based on astrological data.
 
 Key traits:
 - Speak in a warm, understanding, and mystical tone
@@ -65,36 +81,37 @@ FEEDBACK HANDLING: If the user provides feedback (👍👎✏️), acknowledge i
 
 When responding to feedback with comments, focus on SOLVING the issue rather than asking what went wrong - the user has already told you what needs fixing.`;
 
-    // Add astrology context if available (only for regular chat – skip for large synthesis to save tokens)
-    if (astroData && !isProfileSynthesis) {
-      systemPrompt += `\n\nUser's Birth Chart Data:` +
-                      `\nDate of Birth: ${astroData.input?.date}/${astroData.input?.month}/${astroData.input?.year}` +
-                      `\nTime of Birth: ${astroData.input?.hours}:${astroData.input?.minutes?.toString().padStart(2, '0')}` +
-                      `\nLocation: ${astroData.input?.latitude}°, ${astroData.input?.longitude}°` +
-                      `\nAyanamsha: ${astroData.input?.settings?.ayanamsha}` +
-                      `\n\nPlanetary Positions:`;
+      // Add astrology context if available (only for regular chat – skip for large synthesis to save tokens)
+      if (astroData && !isProfileSynthesis) {
+        systemPrompt += `\n\nUser's Birth Chart Data:` +
+                        `\nDate of Birth: ${astroData.input?.date}/${astroData.input?.month}/${astroData.input?.year}` +
+                        `\nTime of Birth: ${astroData.input?.hours}:${astroData.input?.minutes?.toString().padStart(2, '0')}` +
+                        `\nLocation: ${astroData.input?.latitude}°, ${astroData.input?.longitude}°` +
+                        `\nAyanamsha: ${astroData.input?.settings?.ayanamsha}` +
+                        `\n\nPlanetary Positions:`;
 
-      // Add planetary positions to context
-      if (astroData.output && astroData.output[0]) {
-        const planetsData = astroData.output[0];
-        Object.keys(planetsData).forEach(key => {
-          const planetData = planetsData[key];
-          if (planetData.name && key !== 'debug' && key !== '13' && 
-              planetData.current_sign !== undefined && 
-              planetData.normDegree !== undefined) {
-            const zodiacSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-            const signName = zodiacSigns[planetData.current_sign - 1] || 'Unknown';
+        // Add planetary positions to context
+        if (astroData.output && astroData.output[0]) {
+          const planetsData = astroData.output[0];
+          Object.keys(planetsData).forEach(key => {
+            const planetData = planetsData[key];
+            if (planetData.name && key !== 'debug' && key !== '13' && 
+                planetData.current_sign !== undefined && 
+                planetData.normDegree !== undefined) {
+              const zodiacSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+              const signName = zodiacSigns[planetData.current_sign - 1] || 'Unknown';
 
-            // Human Design gate calculation
-            try {
-              const gate = signDegreeToGate(planetData.current_sign, planetData.normDegree);
-              systemPrompt += `\n- ${planetData.name}: ${planetData.normDegree.toFixed(2)}° in ${signName} → Gate ${gate}${planetData.isRetro === 'true' ? ' (Retrograde)' : ''}`;
-            } catch {
-              // fallback without gate if calculation fails
-              systemPrompt += `\n- ${planetData.name}: ${planetData.normDegree.toFixed(2)}° in ${signName}${planetData.isRetro === 'true' ? ' (Retrograde)' : ''}`;
+              // Human Design gate calculation
+              try {
+                const gate = signDegreeToGate(planetData.current_sign, planetData.normDegree);
+                systemPrompt += `\n- ${planetData.name}: ${planetData.normDegree.toFixed(2)}° in ${signName} → Gate ${gate}${planetData.isRetro === 'true' ? ' (Retrograde)' : ''}`;
+              } catch {
+                // fallback without gate if calculation fails
+                systemPrompt += `\n- ${planetData.name}: ${planetData.normDegree.toFixed(2)}° in ${signName}${planetData.isRetro === 'true' ? ' (Retrograde)' : ''}`;
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
 
@@ -116,10 +133,8 @@ When responding to feedback with comments, focus on SOLVING the issue rather tha
 
     const aiResponse = response.choices[0]?.message?.content || "I apologize, but I'm having trouble connecting to my cosmic insights right now. Please try again.";
     
-    console.log("AI Response:", aiResponse);
     return aiResponse;
   } catch (error) {
-    console.error('Error generating response:', error);
     throw error;
   }
 } 

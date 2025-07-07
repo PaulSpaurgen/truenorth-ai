@@ -119,7 +119,7 @@ export const useProfileQuery = () => {
     queryFn: fetchProfileData,
     enabled: !!user, // Only run query if user is authenticated
     staleTime: 1000 * 60 * 60 * 12, // 12 hours - data is fresh for half a day
-    gcTime: 1000 * 60 * 60 * 24, // 24 hours - keep in cache for a full day
+    gcTime: 0, // 24 hours - keep in cache for a full day
     refetchOnWindowFocus: false, // Don't refetch on window focus
     refetchOnMount: false, // Don't refetch on component mount if data exists
     retry: (failureCount, error) => {
