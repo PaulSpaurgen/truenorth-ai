@@ -41,6 +41,8 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
     }
 
     const data = await response.json();
+    const userData = await User.findOne({ uid });
+
     if (data) {
       await dbConnect();
       await User.updateOne(
@@ -52,7 +54,10 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
     
     return NextResponse.json({
       success: true,
-      data: data
+      user: {
+        ...userData,
+        astroDetails: data
+      }
     });
 
   } catch (error) {

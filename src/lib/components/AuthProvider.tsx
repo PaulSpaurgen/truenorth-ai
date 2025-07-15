@@ -3,8 +3,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User as FirebaseUser, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebaseClient';
-import { useRouter } from 'next/navigation';
-import { AstroData } from './AstroForm';
 
 type AppUser = FirebaseUser & { astroDetails?: unknown };
 
@@ -15,11 +13,10 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isNewUser: boolean;
   setIsNewUser: (value: boolean) => void;
-  astroDetails: AstroData | null;
-  setAstroDetails: (value: AstroData) => void;
+  setUser: (value: AppUser) => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -30,63 +27,69 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
-  const [astroDetails, setAstroDetails] = useState<AstroData | null>(null);
+  const [sessionEstablished, setSessionEstablished] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user as AppUser);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // User is authenticated, ensure session is established
+        if (!sessionEstablished) {
+          try {
+            const idToken = await firebaseUser.getIdToken();
+            await sessionLogin(idToken);
+            setSessionEstablished(true);
+          } catch (error) {
+            console.error('Error establishing session:', error);
+          }
+        }
+      } else {
+        // User is not authenticated
+        setUser(null);
+        setIsNewUser(false);
+        setSessionEstablished(false);
+      }
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (loading) return;
-    
-    if (user) {
-      if (isNewUser) {
-        router.push('/onboarding');
-      } else {
-        router.push('/dashboard');
-      }
-    } else {
-      router.push('/login');
-    }
-  }, [user, loading, isNewUser, router]);
-
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
-      // Create session cookie on server
-      const response = await fetch('/api/sessionLogin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken }),
-      });
-      const data = await response.json();
-      if (data.isNewUser) {
-        setIsNewUser(true);
-      } else {
-        setIsNewUser(false);
-        setAstroDetails(data.astroDetails);
-      }
+      await sessionLogin(idToken);
     } catch (error) {
       console.error('Error signing in with Google:', error);
     }
   };
+
+   const sessionLogin = async (idToken: string) => {
+    const response = await fetch('/api/sessionLogin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken }),
+    });
+    const data = await response.json();
+    if (data.isNewUser) {
+      setIsNewUser(true);
+    } else {
+      setIsNewUser(false);
+      setUser(data?.user);
+    }
+    setSessionEstablished(true);
+   }
 
   const logout = async () => {
     try {
       await signOut(auth);
       // Clear session cookie on server
       await fetch('/api/sessionLogout', { method: 'POST' });
+      setSessionEstablished(false);
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -99,8 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithGoogle,
     logout,
     setIsNewUser,
-    astroDetails,
-    setAstroDetails,
+    setUser,
   };
 
   return (

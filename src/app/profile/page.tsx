@@ -1,11 +1,11 @@
 'use client';
 
-import { useAuth } from '@/lib/components/AuthProvider';
+import { useUser } from '@/lib/hooks/useUser';
 import { useProfileQuery, type ProfileData } from '@/lib/hooks/useProfileQuery';
 import { useState } from 'react';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user } = useUser();
   const { 
     data: profileData, 
     isLoading, 

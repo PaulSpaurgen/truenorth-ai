@@ -1,32 +1,43 @@
 "use client";
 
-import { useEffect, Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/components/AuthProvider';
+import { useUser } from '@/lib/hooks/useUser';
 
 function LoginContent() {
-  const { user, signInWithGoogle, loading } = useAuth();
-  const params = useSearchParams();
+  const { user, signInWithGoogle, loading } = useUser();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
   const router = useRouter();
-
-  // If already signed in, redirect back
+  
+  // If user is already authenticated, redirect them
   useEffect(() => {
-    if (!loading && user) {
-      const redirectPath = params.get('redirect') || '/dashboard';
-      router.replace(redirectPath);
+    if (user) {
+      router.push(redirectTo);
     }
-  }, [loading, user, params, router]);
-
-  if (loading) {
+  }, [user, redirectTo, router]);
+  
+  if (user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting...</p>
+        </div>
+      </div>
     );
   }
 
-  // if (user) {
-  //   router.replace('/dashboard');
-  //   return null;
-  // }
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -45,7 +56,12 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>}>
       <LoginContent />
     </Suspense>
   );

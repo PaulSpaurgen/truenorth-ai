@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { useAuth } from './AuthProvider';
+import { useUser } from '@/lib/hooks/useUser';
 
 export default function UserMenu() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useUser();
   const [isOpen, setIsOpen] = useState(false);
 
   if (!user) return null;

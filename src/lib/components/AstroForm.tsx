@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from './AuthProvider';
+import { useUser } from '@/lib/hooks/useUser';
 
 export interface AstroData {
   year: number;
@@ -32,7 +32,7 @@ interface LocationSuggestion {
 }
 
 export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
-  const { user } = useAuth();
+  const { user } = useUser();
   const defaultData: AstroData = {
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,

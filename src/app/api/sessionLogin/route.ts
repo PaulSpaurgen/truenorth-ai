@@ -45,9 +45,8 @@ export async function POST(req: Request) {
     
     try {
       const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn });
-      console.log('sessionLogin: Session cookie created successfully');
       
-      const res = NextResponse.json({ success: true, isNewUser });
+      const res = NextResponse.json({ success: true, isNewUser , user : user || defaultUser });
       res.cookies.set('token', sessionCookie, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

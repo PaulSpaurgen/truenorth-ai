@@ -1,13 +1,13 @@
 "use client";
 import { signOut } from "firebase/auth";
-import { useAuth } from "./AuthProvider";
+import { useUser } from "@/lib/hooks/useUser";
 import Link from "next/link";
 import { auth } from "../firebaseClient";
 import { useRouter } from "next/navigation";
 
 export default function Nav() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useUser();
 
   const handleSignOut = async () => {
     await signOut(auth);
