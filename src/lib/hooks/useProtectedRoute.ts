@@ -11,6 +11,8 @@ export function useProtectedRoute(options: UseProtectedRouteOptions = {}) {
   const { user, loading, hasCompletedOnboarding , isNewUser } = useUser();
   const router = useRouter();
   const { redirectTo = '/dashboard', requireOnboarding = isNewUser } = options;
+
+  console.log('user', isNewUser, requireOnboarding, hasCompletedOnboarding);
   
   useEffect(() => {
     // Wait until loading is complete
@@ -23,7 +25,7 @@ export function useProtectedRoute(options: UseProtectedRouteOptions = {}) {
     }
     
     // If user is logged in but hasn't completed onboarding, redirect to onboarding
-    if (requireOnboarding && !hasCompletedOnboarding) {
+    if (requireOnboarding || !hasCompletedOnboarding) {
       router.push('/onboarding');
       return;
     }

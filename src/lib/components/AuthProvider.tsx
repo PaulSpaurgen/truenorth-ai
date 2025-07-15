@@ -79,8 +79,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsNewUser(true);
     } else {
       setIsNewUser(false);
-      setUser(data?.user);
     }
+    setUser(data?.user);
     setSessionEstablished(true);
    }
 

@@ -11,7 +11,7 @@ export function useUser() {
   
   // A user has completed onboarding if they have astroDetails
   const hasCompletedOnboarding = Boolean(user?.astroDetails && Object.keys(user?.astroDetails).length > 0);
-  console.log('hasCompletedOnboarding', hasCompletedOnboarding , user?.astroDetails);
+  
   return {
     user,
     loading,

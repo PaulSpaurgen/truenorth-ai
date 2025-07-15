@@ -179,7 +179,7 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 mt-40 mx-auto max-w-2xl">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Hello {user?.displayName}</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Hello {user?.name}</h2>
       <p className="text-sm text-gray-600 mb-6">Please enter your birth details to get started</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         
