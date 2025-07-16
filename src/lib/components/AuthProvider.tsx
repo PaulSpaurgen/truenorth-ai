@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [sessionEstablished]);
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();

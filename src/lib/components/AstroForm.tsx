@@ -32,7 +32,7 @@ interface LocationSuggestion {
 }
 
 export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
-  const { user } = useUser();
+  // const { user } = useUser(); // Removed unused variable
 
   const defaultData: AstroData = {
     year: new Date().getFullYear(),
