@@ -30,6 +30,13 @@ export default function RootLayout({
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{
+          backgroundImage: 'url("/trueNorthBG.webp")', // Path from public directory
+          backgroundSize: 'cover', // Ensures the image covers the entire background
+          backgroundAttachment: 'fixed', // Makes the background fixed while scrolling
+          backgroundPosition: 'center', // Centers the background image
+          minHeight: '100vh', // Ensures the body takes at least the full viewport height
+        }}
       >
         <QueryProvider>
           <AuthProvider>

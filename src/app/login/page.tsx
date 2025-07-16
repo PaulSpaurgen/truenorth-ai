@@ -53,17 +53,17 @@ function LoginContent() {
   };
 
   return (
-    <main 
-      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-gray-950" 
-      style={{ backgroundImage: 'url("/images/true-north-star-bg.jpg")', backgroundSize: 'cover', backgroundPosition: 'center' }}
+    <main
+      className="min-h-screen flex items-center justify-center"
     >
-      <div className="relative bg-black bg-opacity-90 p-8 rounded-lg shadow-xl text-center overflow-hidden w-screen h-screen flex items-center justify-center"> 
+      {/* THIS IS THE KEY CHANGE: Removed bg-black bg-opacity-90, rounded-lg, shadow-xl, p-8, text-center */}
+      <div className="relative overflow-hidden w-screen h-screen flex items-center justify-center"> 
         
         <div className={`absolute inset-0 flex flex-col items-center justify-center p-8 transition-all duration-700 ease-in-out ${!showLoginOptions ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
-          <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center">
+          <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center "> {/* Kept bg-opacity on inner div for content readability */}
             <img src="/star.svg" alt="TrueNorth " className="mb-4 h-12" />
-            <h1 className="text-[80px] font-normal mb-2 text-[#F1C4A4]" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
-            <p className="text-2xl mb-6 text-white" style={{ fontFamily: 'Times New Roman, serif' }}>The Sacred Return to Who We've Always Been</p>
+            <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[80px] font-normal mb-2 text-[#F1C4A4]" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
+            <p className="text-lg sm:text-xl md:text-2xl mb-6 text-white" style={{ fontFamily: 'Times New Roman, serif' }}>The Sacred Return to Who We've Always Been</p>
             
             <iframe 
               src="https://lottie.host/embed/112e77db-c31e-42a2-abcc-3c4fd4e5286f/SYJt4jekgg.lottie" 
@@ -74,15 +74,15 @@ function LoginContent() {
 
             <button
               onClick={() => setShowLoginOptions(true)}
-              className="text-white px-8 py-3 rounded-full text-xl shadow-lg hover:brightness-110 mb-30"
+              className="text-white px-8 py-3 rounded-full text-lg sm:text-xl shadow-lg hover:brightness-110 mb-30"
               style={{ backgroundColor: '#1B5C65', transition: 'background-color 0.3s ease, filter 0.3s ease', fontFamily: 'montserrat,serif, Georgia' }}
             >
               Begin Your Journey
             </button>
-            <p className="text-xl whitespace-nowrap text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+            <p className="text-base sm:text-lg whitespace-nowrap text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
               Discover your cosmic blueprint and navigate life's journey with clarity and purpose.
             </p>
-            <p className="text-xl whitespace-nowrap text-[#F1C4A4]" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+            <p className="text-base sm:text-lg whitespace-nowrap text-[#F1C4A4]" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
               TrueNorth connects you to the ancient wisdom of the stars.
             </p>
           </div>
@@ -90,15 +90,16 @@ function LoginContent() {
 
         <div className={`absolute inset-0 flex flex-col items-center justify-center p-8 transition-all duration-700 ease-in-out ${showLoginOptions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'}`}>
           
-          <div className="flex items-center justify-center mb-6">
-            <img src="/star.svg" alt="TrueNorth Logo" className="h-8 w-8 mr-2" />
-            <h1 className="text-3xl text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
-          </div>
-
-          <div className="w-full max-w-[300px] sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center bg-black bg-opacity-90 p-8 rounded-lg shadow-xl border-[0.1px] border-gray-600">  
+          <div className="w-full max-w-[300px] sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center bg-black bg-opacity-90 p-8 rounded-lg shadow-xl border-[0.1px] border-gray-600">  {/* Kept bg-opacity on inner div for content readability */}
+            
+            <div className="flex items-center justify-center mb-6">
+              <img src="/star.svg" alt="TrueNorth Logo" className="h-8 w-8 mr-2" />
+              <h1 className="text-2xl sm:text-3xl text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
+            </div>
+            
             <div className="flex w-full mb-6 border-b-[0.3px] border-gray-700">
               <button 
-                className="flex-1 pb-2 text-lg border-b-1 border-[#3a6f7c] text-white"
+                className="flex-1 pb-2 text-base sm:text-lg border-b-1 border-[#3a6f7c] text-white"
                 style={{ fontFamily: 'montserrat,serif, Georgia' }}
               >
                 Sign In

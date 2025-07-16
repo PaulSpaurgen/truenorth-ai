@@ -41,7 +41,8 @@ export default function Nav() {
             <p className="text-gray-700">{user?.displayName}</p>
             <button 
               onClick={handleSignOut}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              className="bg-[#3a6f7c] text-white  rounded p-3 font-medium hover:bg-[#2a4f5c] transition-colors"
+              style={{ fontFamily: 'montserrat,serif, Georgia' }}
             >
               Sign Out
             </button>

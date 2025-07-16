@@ -167,7 +167,7 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
   };
 
   return (
-    <div className="bg-[#0E1014] min-h-screen flex items-center justify-center px-4">
+    <div className=" min-h-screen flex items-center justify-center px-4">
       <div className="bg-[#0E1014] rounded-lg shadow-lg p-6 sm:p-8 w-full sm:max-w-[90%] md:max-w-2xl border border-gray-700 flex flex-col justify-center">
         <h2 className="text-3xl sm:text-4xl text-[#F1C4A4] mb-2 text-center" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
           Birth Details
@@ -270,7 +270,7 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
 
           <button
             type="submit"
-            className="w-full bg-[#3a6f7c] text-white py-3 px-4 rounded-md focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+            className="w-full bg-[#3a6f7c] text-white py-3 px-4 rounded-md focus:ring-blue-500 focus:ring-offset-2  font-medium hover:bg-[#2a4f5c] transition-colors"
             style={{ fontFamily: 'montserrat,serif, Georgia' }}
           >
             Submit Birth Details
