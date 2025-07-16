@@ -16,17 +16,21 @@ export default function Nav() {
 
   return (
     <div>
-      <div className="fixed top-0 left-0 right-0 flex justify-between items-center p-4 bg-white shadow-sm z-10">
+      <div className="fixed top-0 left-0 right-0 flex justify-between items-center p-4 bg-[#0E1014 ] shadow-sm z-10">
         <div className="flex items-center space-x-4">
-          <Link href="/dashboard" className="text-purple-600 hover:text-purple-800 font-medium">
-            Dashboard
-          </Link>
+          
           {user && (
             <>
-              <Link href="/profile" className="text-purple-600 hover:text-purple-800 font-medium">
+              <Link href="/dashboard" className="text-white  font-l"
+              style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+                Dashboard
+              </Link>
+              <Link href="/profile" className="text-white  font-l"
+              style={{ fontFamily: 'montserrat,serif, Georgia' }}>
                 Profile
               </Link>
-              <Link href="/analytics" className="text-purple-600 hover:text-purple-800 font-medium">
+              <Link href="/analytics" className="text-white  font-l"
+              style={{ fontFamily: 'montserrat,serif, Georgia' }}>
                 Analytics
               </Link>
             </>

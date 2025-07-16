@@ -178,108 +178,113 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
  
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mt-40 mx-auto max-w-2xl">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Hello {user?.name}</h2>
-      <p className="text-sm text-gray-600 mb-6">Please enter your birth details to get started</p>
+    <div className="bg-[#0E1014] min-h-screen flex items-center justify-center">
+  <div className="bg-[#0E1014] rounded-lg shadow-lg p-6 mx-auto max-w-2xl border border-gray-700 w-full flex flex-col justify-center">
+
+      <h2 className="text-4xl  text-[#F1C4A4] mb-2 text-center" style={{ fontFamily: 'montserrat,serif, Georgia' }}> Birth Details</h2>
+      <p className="text-xl text-center text-white mb-6" style={{ fontFamily: 'montserrat,serif, Georgia' }}>Please enter your birth details to get started</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         
         {/* Date and Time Section */}
-        <div className="grid grid-cols-1 gap-4">
-          
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Year</label>
-              <input
-                type="number"
-                min="1900"
-                max="2100"
-                value={formData.year}
-                onChange={(e) => handleInputChange('year', parseInt(e.target.value))}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Month</label>
-              <select
-                value={formData.month}
-                onChange={(e) => handleInputChange('month', parseInt(e.target.value))}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {new Date(2000, i).toLocaleString('default', { month: 'long' })}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Date</label>
-              <input
-                type="number"
-                min="1"
-                max="31"
-                value={formData.date}
-                onChange={(e) => handleInputChange('date', parseInt(e.target.value))}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-          </div>
-        </div>
+        <div className="grid grid-cols-3 gap-3">
+  <div>
+    <label className="block text-sm font-medium text-white mb-1" style={{ fontFamily: 'montserrat,serif, Georgia' }}>Year</label>
+    <input
+      type="number"
+      min="1900"
+      max="2100"
+      value={formData.year}
+      onChange={(e) => handleInputChange('year', parseInt(e.target.value))}
+      placeholder="YYYY"
+      className="w-full p-2 border border-gray-700 rounded-md placeholder-gray-400 text-white bg-[#1a1a1a] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      required
+    />
+  </div>
+
+  <div>
+    <label className="block text-sm font-medium text-white mb-1" style={{ fontFamily: 'montserrat,serif, Georgia' }}>Month</label>
+    <select
+      value={formData.month}
+      onChange={(e) => handleInputChange('month', parseInt(e.target.value))}
+      className="w-full p-2 border border-gray-700 rounded-md text-white bg-[#1a1a1a] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      required
+    >
+      <option value="" disabled>Select Month</option>
+      {Array.from({ length: 12 }, (_, i) => (
+        <option key={i + 1} value={i + 1}>
+          {new Date(2000, i).toLocaleString('default', { month: 'long' })}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  <div>
+    <label className="block text-sm font-medium text-white mb-1" style={{ fontFamily: 'montserrat,serif, Georgia' }}>Date</label>
+    <input
+      type="number"
+      min="1"
+      max="31"
+      value={formData.date}
+      onChange={(e) => handleInputChange('date', parseInt(e.target.value))}
+      placeholder="DD"
+      className="w-full p-2 border border-gray-700 rounded-md placeholder-gray-400 text-white bg-[#1a1a1a] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      required
+    />
+  </div>
+</div>
 
         {/* Location Section */}
-        <div className="grid grid-cols-1 gap-4">
-          
-          {/* Location Search */}
-          <div className="relative location-search-container">
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Search for a place (City, State, Country)
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={locationQuery}
-                onChange={handleLocationSearch}
-                placeholder="e.g., New York City, New York, United States"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              {isSearching && (
-                <div className="absolute right-3 top-2.5">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                </div>
-              )}
-            </div>
-            
-            {/* Location Suggestions Dropdown */}
-            {showSuggestions && locationSuggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                {locationSuggestions.map((location) => (
-                  <button
-                    key={location.place_id}
-                    type="button"
-                    onClick={() => handleLocationSelect(location)}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
-                  >
-                    <div className="text-sm text-gray-800 truncate">
-                      {location.display_name}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+        <div className="relative location-search-container">
+  <label className="block text-sm font-medium text-white mb-1 mt-6" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+    Location
+  </label>
+  <div className="relative">
+    <input
+      type="text"
+      value={locationQuery}
+      onChange={handleLocationSearch}
+      placeholder="Search for a place (City, State, Country)"
+      className="w-full p-2 border border-gray-700 rounded-md text-white placeholder-gray-400 bg-[#1a1a1a] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      style={{ fontFamily: 'montserrat,serif, Georgia' }}
+      required
+    />
+    {isSearching && (
+      <div className="absolute right-3 top-2.5">
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+      </div>
+    )}
+  </div>
+  <p className="text-xs text-gray-400 mt-3">Example: New York, NY, USA</p>
+
+  {/* Suggestion dropdown stays the same */}
+  {showSuggestions && locationSuggestions.length > 0 && (
+    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+      {locationSuggestions.map((location) => (
+        <button
+          key={location.place_id}
+          type="button"
+          onClick={() => handleLocationSelect(location)}
+          className="w-full text-left px-3 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+        >
+          <div className="text-sm text-gray-800 truncate">
+            {location.display_name}
           </div>
-          
-        </div>
+        </button>
+      ))}
+    </div>
+  )}
+</div>
+  
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+          className="w-full bg-[#3a6f7c] text-white py-3 px-4 rounded-md  focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+          style={{ fontFamily: 'montserrat,serif, Georgia' }}
         >
           Submit Birth Details
         </button>
       </form>
+    </div>
     </div>
   );
 } 
