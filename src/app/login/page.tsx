@@ -56,11 +56,10 @@ function LoginContent() {
     <main
       className="min-h-screen flex items-center justify-center"
     >
-      {/* THIS IS THE KEY CHANGE: Removed bg-black bg-opacity-90, rounded-lg, shadow-xl, p-8, text-center */}
       <div className="relative overflow-hidden w-screen h-screen flex items-center justify-center"> 
         
         <div className={`absolute inset-0 flex flex-col items-center justify-center p-8 transition-all duration-700 ease-in-out ${!showLoginOptions ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
-          <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center "> {/* Kept bg-opacity on inner div for content readability */}
+          <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center "> 
             <img src="/star.svg" alt="TrueNorth " className="mb-4 h-12" />
             <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[80px] font-normal mb-2 text-[#F1C4A4]" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
             <p className="text-lg sm:text-xl md:text-2xl mb-6 text-white" style={{ fontFamily: 'Times New Roman, serif' }}>The Sacred Return to Who We've Always Been</p>

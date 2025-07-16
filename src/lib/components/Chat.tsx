@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+
+type Tab = 'cosmic' | 'astrology' | 'human-design';
 
 interface Message {
   id: string;
@@ -9,343 +11,216 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
 }
-export default function Chat() {
+
+const SendIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className="w-5 h-5 text-white"
+  >
+    <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+  </svg>
+);
+
+export default function ChatPage() {
+  const [activeTab, setActiveTab] = useState<Tab>('cosmic');
+  const [user, setUser] = useState<User | null>(null);
+  const [hasChatStarted, setHasChatStarted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Welcome message when component mounts
+  const userName = user?.displayName || user?.email || 'Cosmic Voyager';
+
   useEffect(() => {
-    const welcomeMessage = "🌟 Welcome! I'm TrueNorth, your spiritual guide. To provide personalized astrological insights, please first generate your birth chart using the form on the left. How may I assist you on your cosmic journey?";
-    
-    setMessages([{
-      id: 'welcome',
-      content: welcomeMessage,
-      isUser: false,
-      timestamp: new Date()
-    }]);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
   }, []);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+    if (hasChatStarted) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isTyping, hasChatStarted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
+
+    if (!hasChatStarted) {
+      setHasChatStarted(true);
+    }
 
     setLoading(true);
-    setIsTyping(true);
-    const userMessage = input;
+    const userMessageContent = input;
     setInput('');
 
-    // Add user message
     const newUserMessage: Message = {
       id: Date.now().toString(),
-      content: userMessage,
+      content: userMessageContent,
       isUser: true,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    setMessages(prev => [...prev, newUserMessage]);
+    
+    // const aiWelcomeMessage: Message = {
+    //     id: 'welcome',
+    //     content: `🌟 Welcome! I'm TrueNorth. I have attuned to your cosmic blueprint. How may I assist you on your journey, ${userName}?`,
+    //     isUser: false,
+    //     timestamp: new Date(),
+    // };
+
+    const updatedMessages = hasChatStarted ? [...messages, newUserMessage] :  newUserMessage ? [...messages, newUserMessage] : [];
+    setMessages(updatedMessages);
+
+    setTimeout(() => setIsTyping(true), 100);
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        credentials: 'include', // ensure auth cookie is sent
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          message: userMessage,
-          conversationHistory: messages.slice(-6) // Send last 6 messages for context
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMessageContent,
+          conversationHistory: updatedMessages.slice(-6),
         }),
       });
 
       const data = await response.json();
+
+      const aiResponseMessage: Message = {
+        id: data.id || Date.now().toString() + '-ai',
+        content: data.response,
+        isUser: false,
+        timestamp: new Date(),
+      };
       
-      // Simulate typing delay for more natural conversation
-      setTimeout(() => {
-        setIsTyping(false);
-        // Add AI response
-        setMessages(prev => [...prev, {
-          id: data.id,
-          content: data.response,
-          isUser: false,
-          timestamp: new Date()
-        }]);
-      }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
+      setMessages(prev => [...prev, aiResponseMessage]);
 
     } catch (error) {
       console.error('Error:', error);
-      setIsTyping(false);
-      // Add error message
-      setMessages(prev => [...prev, { 
-        id: Date.now().toString(), 
-        content: 'I apologize, but I seem to have lost my cosmic connection momentarily. Please try reaching out again.', 
+      const errorResponseMessage: Message = {
+        id: Date.now().toString() + '-error',
+        content: 'I apologize, but I seem to have lost my cosmic connection. Please try again.',
         isUser: false,
-        timestamp: new Date()
-      }]);
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorResponseMessage]);
     } finally {
+      setIsTyping(false);
       setLoading(false);
     }
   };
-
-  const handleFeedback = async (messageId: string, type: 'like' | 'dislike' | 'correction') => {
-    try {
-      let comment = '';
-      
-      // Ask for comment if it's a dislike or correction
-      if (type === 'dislike' || type === 'correction') {
-        comment = prompt(
-          type === 'dislike' 
-            ? 'What could be improved about this response?' 
-            : 'What correction would you like to suggest?'
-        ) || '';
-      }
-
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-      const idToken = currentUser ? await currentUser.getIdToken() : null;
-      
-      // Submit feedback to backend
-      await fetch('/api/feedback', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 
-          'Content-Type': 'application/json',
-          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
-        },
-        body: JSON.stringify({ 
-          chatId: messageId, 
-          type,
-          comment: comment.trim() || undefined
-        }),
-      });
-
-      // Create feedback message for the chat
-      let feedbackMessage = '';
-      switch (type) {
-        case 'like':
-          feedbackMessage = '👍 I found this response helpful!';
-          break;
-        case 'dislike':
-          feedbackMessage = `👎 This response could be improved${comment ? `: ${comment}` : '.'}`;
-          break;
-        case 'correction':
-          feedbackMessage = `✏️ I'd like to suggest a correction${comment ? `: ${comment}` : '.'}`;
-          break;
-      }
-
-      // Add feedback as user message
-      const feedbackUserMessage: Message = {
-        id: Date.now().toString(),
-        content: feedbackMessage,
-        isUser: true,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, feedbackUserMessage]);
-
-      // Only get AI response for negative feedback or corrections
-      if (type === 'dislike' || type === 'correction') {
-        setIsTyping(true);
-        
-        try {
-          const response = await fetch('/api/chat', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-              message: feedbackMessage,
-              conversationHistory: messages.slice(-3) // Limited context for feedback
-            }),
-          });
-
-          const data = await response.json();
-          
-          // Add AI response to feedback
-          setTimeout(() => {
-            setIsTyping(false);
-            setMessages(prev => [...prev, {
-              id: data.id,
-              content: data.response,
-              isUser: false,
-              timestamp: new Date()
-            }]);
-          }, 500 + Math.random() * 500); // Shorter delay for feedback responses
-
-        } catch (error) {
-          console.error('Error getting AI feedback response:', error);
-          setIsTyping(false);
-          setMessages(prev => [...prev, { 
-            id: Date.now().toString(), 
-            content: 'Thank you for your feedback! I\'ll work on improving my responses.', 
-            isUser: false,
-            timestamp: new Date()
-          }]);
-        }
-      } else {
-        // For likes, just add a simple acknowledgment
-        setTimeout(() => {
-          setMessages(prev => [...prev, { 
-            id: Date.now().toString(), 
-            content: '✨ Thank you for the positive feedback! It helps me understand what works well.', 
-            isUser: false,
-            timestamp: new Date()
-          }]);
-        }, 500);
-      }
-      
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      alert('Failed to submit feedback. Please try again.');
-    }
-  };
-
+  
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Blended Astro-HD starter questions
-  const suggestedQuestions = [
-    "What is my Human Design type and strategy?",
-    "Which gates are activated by my Sun and Moon placements?",
-    "How do my planetary positions interact with my design channels?",
-    "What does my profile say about my life path?",
-    "Which current transits are lighting up my gates right now?"
-  ];
-
   return (
-    <div className="flex flex-col h-full w-full max-w-[1400px] mx-auto p-4">
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-t-lg">
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2">
-          🌙◈ TrueNorth Astro-Design Oracle
-        </h2>
-        <p className="text-sm opacity-90">Your Astrology ✧ Human Design Guide</p>
-      </div>
+    <div className="h-screen w-screen  text-white  bg-transparent px-50" >
+      
+<div className="w-[100%] h-[100%] bg-black/50 rounded-2xl shadow-2xl ">
 
-      <div className="bg-white rounded-b-lg shadow-lg flex-1 flex flex-col px-2 sm:px-4">
-        {/* Messages Area */}
-        <div className="flex-1 p-4 overflow-y-auto max-h-[500px] space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} group`}
+        <header className="w-80 pt-6 pb-4 fixed top-15 left-130 right-0 z-10">
+          <div className="flex items-center gap-2 p-1  border border-gray-700 bg-gray-900/50">
+            <button
+              onClick={() => setActiveTab('cosmic')}
+              className={`px-4 py-1.5  text-sm transition-colors ${activeTab === 'cosmic' ? ' text-[#F1C4A4]' : 'text-white hover:bg-gray-800/50 '} `}
+              style={{ fontFamily: 'serif' }}
             >
-              <div className={`max-w-[80%] ${message.isUser ? 'order-2' : 'order-1'}`}>
-                <div
-                  className={`p-3 rounded-2xl ${
-                    message.isUser
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-800 border'
-                  }`}
-                >
-                  <div className="whitespace-pre-wrap">{message.content}</div>
-                </div>
-                <div className={`text-xs text-gray-500 mt-1 ${message.isUser ? 'text-right' : 'text-left'}`}>
-                  {formatTime(message.timestamp)}
-                </div>
-                {!message.isUser && message.id !== 'welcome' && (
-                  <div className="mt-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => handleFeedback(message.id, 'like')}
-                      className="text-green-500 hover:text-green-700 p-1 rounded"
-                      title="Helpful"
-                    >
-                      👍
-                    </button>
-                    <button
-                      onClick={() => handleFeedback(message.id, 'dislike')}
-                      className="text-red-500 hover:text-red-700 p-1 rounded"
-                      title="Not helpful"
-                    >
-                      👎
-                    </button>
-                    <button
-                      onClick={() => handleFeedback(message.id, 'correction')}
-                      className="text-yellow-500 hover:text-yellow-700 p-1 rounded"
-                      title="Needs correction"
-                    >
-                      ✏️
-                    </button>
-                  </div>
-                )}
-              </div>
+              Cosmic
+            </button>
+            <button
+              onClick={() => setActiveTab('astrology')}
+              className={`px-4 py-1.5  text-sm transition-colors ${activeTab === 'astrology' ? ' text-[#F1C4A4]' : 'text-white hover:bg-gray-800/50'}`}
+            >
+              Astrology
+            </button>
+            <button
+              onClick={() => setActiveTab('human-design')}
+              className={`px-4 py-1.5  text-sm transition-colors ${activeTab === 'human-design' ? ' text-[#F1C4A4]' : 'text-white hover:bg-gray-800/50'}`}
+            >
+              Human Design
+            </button>
+          </div>
+        </header>
+
+        <div className=''>
+          <main className="flex-1 overflow-hidden relative pt-50 pb-16 px-4 sm:px-6 lg:px-8"
+        style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+          {!hasChatStarted ? (
+            <div className="h-full flex flex-col justify-center items-center text-center animate-fadeIn">
+              <h1 className="text-5xl font-serif text-[#F1C4A4]"
+              style={{ fontFamily: 'montserrat,serif, Georgia' }}>{`Hi, ${userName}`}</h1>
+              <p className="mt-2 text-lg text-gray-300">Discover your Cosmic Blueprint!</p>
             </div>
-          ))}
-          
-          {/* Typing Indicator */}
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="bg-gray-100 border rounded-2xl p-3 max-w-[80%]">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          ) : (
+            <div className="p-4 space-y-4 animate-fadeInUp ">
+              {messages.map((message) => (
+                <div key={message.id} className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] p-3 rounded-2xl ${message.isUser ? 'bg-[#00A79D] text-white' : 'bg-gray-800 text-white'}`}>
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    <p className={`text-xs mt-1.5 ${message.isUser ? 'text-right text-gray-200/70' : 'text-left text-gray-400'}`}>
+                      {formatTime(message.timestamp)}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">TrueNorth is consulting the stars...</div>
-              </div>
+              ))}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-800 rounded-2xl p-3 max-w-[80%] text-white">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
           )}
-          
-          <div ref={messagesEndRef} />
+        </main>
         </div>
 
-        {/* Suggested Questions */}
-      
-
-        {/* Astrology-specific suggestions */}
-        {messages.length <= 1 && (
-          <div className="p-4 border-t bg-gradient-to-r from-purple-50 to-blue-50">
-            <p className="text-sm text-purple-700 mb-2">🔮 Explore your chart:</p>
-            <div className="flex flex-wrap gap-2">
-              {suggestedQuestions.map((question, index) => (
-                <button
-                  key={index}
-                  onClick={() => setInput(question)}
-                  className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full hover:bg-purple-200 transition-colors"
-                >
-                  {question}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Input Area */}
-        <div className="p-4 border-t">
-          <form onSubmit={handleSubmit} className="flex gap-2">
+        <footer className="w-full px-4 sm:px-6 lg:px-8 py-4 flex-shrink-0 fixed bottom-0 left-0 right-0">
+          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex items-center gap-3 p-2 rounded-xl bg-gray-900/70 backdrop-blur-sm border border-gray-700">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask TrueNorth about your cosmic journey..."
-              className="flex-1 p-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+              placeholder="Ask a question...."
+              className="flex-1 p-2 bg-transparent text-white placeholder-gray-500 focus:outline-none"
               disabled={loading}
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-3 rounded-full hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
+              className="bg-[#00A79D] w-10 h-10 rounded-lg flex items-center justify-center transition-opacity disabled:opacity-50 flex-shrink-0"
             >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Channeling...
-                </>
-              ) : (
-                <>
-                  Send ✨
-                </>
-              )}
+              {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <SendIcon />}
             </button>
           </form>
-        </div>
+        </footer>
       </div>
+
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.8s ease-in-out forwards; }
+        .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }
+      `}</style>
     </div>
   );
-} 
+}

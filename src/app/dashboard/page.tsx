@@ -3,7 +3,7 @@
 import { useUser } from '@/lib/hooks/useUser';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import Chat from '@/lib/components/Chat';
+import Chat from '@/lib/components/Chat'; // Ensure this path is correct
 
 export default function Dashboard() {
   const { user, loading, hasCompletedOnboarding } = useUser();
@@ -48,8 +48,8 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 pt-16">
-      <h1 className="text-3xl font-bold mb-4">Welcome, {user?.displayName || user?.email}</h1>
+    <main className="min-h-screen flex flex-col items-center justify-center pt-16">
+      {/* Removed the h1 welcome message from here, as Chat component will handle it */}
       <Chat />
     </main>
   );
