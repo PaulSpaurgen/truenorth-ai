@@ -1,5 +1,10 @@
 @import "tailwindcss";
+@import url(/public/trueNorthBG.webp);
 
 :root {
+    background-image: ('./public/trueNorthBG.webp');
+    background-clip: border-box;
+    background-size: cover;
+    background-position: center;
 }
 

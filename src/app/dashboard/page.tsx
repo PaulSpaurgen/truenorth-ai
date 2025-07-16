@@ -2,10 +2,12 @@
 
 import { useUser } from '@/lib/hooks/useUser';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import Chat from '@/lib/components/Chat';
+import { useEffect, useState } from 'react';
+import Chat from '@/lib/components/Chat'; // Ensure this path is correct
+type Tab = 'cosmic' | 'astrology' | 'human-design';
 
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState<Tab>('cosmic');
   const { user, loading, hasCompletedOnboarding } = useUser();
   const router = useRouter();
 
@@ -48,9 +50,31 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 pt-16">
-      <h1 className="text-3xl font-bold mb-4">Welcome, {user?.displayName || user?.email}</h1>
+    <>
+      <div className="flex justify-center w-full fixed top-16 z-10">
+          <div className="flex w-fit border border-gray-700 bg-gray-900/50  top-0 z-10 ">
+            <button
+              onClick={() => setActiveTab('cosmic')}
+              className={`px-4 py-1.5 border-r border-gray-700  text-md transition-colors cursor-pointer ${activeTab === 'cosmic' ? ' text-[#F1C4A4]' : 'text-white hover:bg-gray-800/50 '} `}
+              style={{ fontFamily: 'serif' }}
+            >
+              Cosmic
+            </button>
+            <button
+              onClick={() => setActiveTab('astrology')}
+              className={`px-4 py-1.5 border-r border-gray-700  text-md transition-colors cursor-pointer ${activeTab === 'astrology' ? ' text-[#F1C4A4]' : 'text-white hover:bg-gray-800/50'}`}
+            >
+              Astrology
+            </button>
+            <button
+              onClick={() => setActiveTab('human-design')}
+              className={`px-4 py-1.5 border-r border-gray-700  text-md transition-colors cursor-pointer ${activeTab === 'human-design' ? ' text-[#F1C4A4]' : 'text-white hover:bg-gray-800/50'}`}
+            >
+               Cards System
+            </button>
+          </div>
+      </div>
       <Chat />
-    </main>
+    </>
   );
 }
