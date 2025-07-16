@@ -17,7 +17,7 @@ function LoginContent() {
       router.push(redirectTo);
     }
   }, [user, redirectTo, router]);
-  
+
   if (user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -61,72 +61,68 @@ function LoginContent() {
         
         <div className={`absolute inset-0 flex flex-col items-center justify-center p-8 transition-all duration-700 ease-in-out ${!showLoginOptions ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
           <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center">
-            
             <img src="/star.svg" alt="TrueNorth " className="mb-4 h-12" />
             <h1 className="text-[80px] font-normal mb-2 text-[#F1C4A4]" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
-            <p className="text-2xl  mb-6 text-white" style={{ fontFamily: 'Times New Roman, serif' }}>The Sacred Return to Who We've Always Been</p>
+            <p className="text-2xl mb-6 text-white" style={{ fontFamily: 'Times New Roman, serif' }}>The Sacred Return to Who We've Always Been</p>
             
-            <iframe src="https://lottie.host/embed/112e77db-c31e-42a2-abcc-3c4fd4e5286f/SYJt4jekgg.lottie" className='h-16 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mb-6' frameBorder="0" allowFullScreen></iframe>
+            <iframe 
+              src="https://lottie.host/embed/112e77db-c31e-42a2-abcc-3c4fd4e5286f/SYJt4jekgg.lottie" 
+              className="h-16 w-full max-w-[200px] sm:max-w-sm md:max-w-md lg:max-w-lg mb-6" 
+              frameBorder="0" 
+              allowFullScreen
+            ></iframe>
 
             <button
               onClick={() => setShowLoginOptions(true)}
-              className="text-white px-8 py-3 rounded-full text-xl  shadow-lg hover:brightness-110 mb-30"
+              className="text-white px-8 py-3 rounded-full text-xl shadow-lg hover:brightness-110 mb-30"
               style={{ backgroundColor: '#1B5C65', transition: 'background-color 0.3s ease, filter 0.3s ease', fontFamily: 'montserrat,serif, Georgia' }}
             >
               Begin Your Journey
             </button>
-            <p className="text-xl whitespace-nowrap  text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>Discover your cosmic blueprint and navigate life's journey with clarity and purpose.</p>
-            <p className="text-xl whitespace-nowrap text-[#F1C4A4] "  style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth connects you to the ancient wisdom of the stars.</p>
-            
+            <p className="text-xl whitespace-nowrap text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+              Discover your cosmic blueprint and navigate life's journey with clarity and purpose.
+            </p>
+            <p className="text-xl whitespace-nowrap text-[#F1C4A4]" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+              TrueNorth connects you to the ancient wisdom of the stars.
+            </p>
           </div>
         </div>
 
         <div className={`absolute inset-0 flex flex-col items-center justify-center p-8 transition-all duration-700 ease-in-out ${showLoginOptions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'}`}>
           
-           <div className="flex items-center justify-center mb-6">
-              <img src="/star.svg" alt="TrueNorth Logo" className="h-8 w-8 mr-2" />
-              <h1 className="text-3xl text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
-            </div>
+          <div className="flex items-center justify-center mb-6">
+            <img src="/star.svg" alt="TrueNorth Logo" className="h-8 w-8 mr-2" />
+            <h1 className="text-3xl text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
+          </div>
 
-          <div className="w-[35%] max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center bg-black bg-opacity-90 p-8 rounded-lg shadow-xl border-[0.1px] border-gray-600">  
-           
-            
+          <div className="w-full max-w-[300px] sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center bg-black bg-opacity-90 p-8 rounded-lg shadow-xl border-[0.1px] border-gray-600">  
             <div className="flex w-full mb-6 border-b-[0.3px] border-gray-700">
               <button 
-                className={`flex-1 pb-2 text-lg border-b-1 border-[#3a6f7c] text-white`}
+                className="flex-1 pb-2 text-lg border-b-1 border-[#3a6f7c] text-white"
                 style={{ fontFamily: 'montserrat,serif, Georgia' }}
               >
                 Sign In
               </button>
             </div>
-            
-            <>
-              
-              <button
-                  onClick={handleGoogleSignIn}
-                  className="w-full flex items-center justify-center gap-2 text-white px-6 py-2 rounded mb-4 hover:brightness-110"
-                  style={{
-                    backgroundColor: '#1B5C65',
-                    transition: 'background-color 0.3s ease, filter 0.3s ease',
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    viewBox="0 0 48 48"
-                    fill="white"
-                  >
-                    <path d="M44.5 20H24v8.5h11.8C34.2 33.3 30 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l6-6C34.1 6.4 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c10.6 0 19.3-7.9 19.3-20 0-1.3-.1-2.4-.3-4z"/>
-                  </svg>
-                  Sign In with Google
-                </button>
 
-
-                            
-              
-              
-              
-            </>
+            <button
+              onClick={handleGoogleSignIn}
+              className="w-full flex items-center justify-center gap-2 text-white  py-5 rounded mb-4 hover:brightness-110 px-4"
+              style={{
+                backgroundColor: '#1B5C65',
+                transition: 'background-color 0.3s ease, filter 0.3s ease',
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5"
+                viewBox="0 0 48 48"
+                fill="white"
+              >
+                <path d="M44.5 20H24v8.5h11.8C34.2 33.3 30 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l6-6C34.1 6.4 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c10.6 0 19.3-7.9 19.3-20 0-1.3-.1-2.4-.3-4z"/>
+              </svg>
+              Sign In with Google
+            </button>
           </div>
         </div>
       </div>
@@ -136,12 +132,14 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3a6f7c] mx-auto mb-4"></div>
-        <p className="text-gray-200">Loading...</p>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3a6f7c] mx-auto mb-4"></div>
+          <p className="text-gray-200">Loading...</p>
+        </div>
       </div>
-    </div>}>
+    }>
       <LoginContent />
     </Suspense>
   );

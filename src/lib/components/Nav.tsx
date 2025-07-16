@@ -17,7 +17,7 @@ export default function Nav() {
   return (
     <div>
       <div className="fixed top-0 left-0 right-0 flex justify-between items-center p-4 bg-[#0E1014 ] shadow-sm z-10">
-        <div className="flex items-center space-x-4">
+        {/* <div className="flex items-center space-x-4">
           
           {user && (
             <>
@@ -35,7 +35,7 @@ export default function Nav() {
               </Link>
             </>
           )}
-        </div>
+        </div> */}
         {user && (
           <div className="flex items-center space-x-4">
             <p className="text-gray-700">{user?.displayName}</p>
