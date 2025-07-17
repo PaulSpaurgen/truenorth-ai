@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Montserrat } from "next/font/google";
+import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/components/AuthProvider";
 import Nav from "@/lib/components/Nav";
 import QueryProvider from "@/lib/components/QueryProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-cormorant-garamond",
   subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -29,13 +32,13 @@ export default function RootLayout({
     <html lang="en">
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${montserrat.variable} ${cormorantGaramond.variable} antialiased`}
         style={{
-          backgroundImage: 'url("/trueNorthBG.webp")', // Path from public directory
-          backgroundSize: 'cover', // Ensures the image covers the entire background
-          backgroundAttachment: 'fixed', // Makes the background fixed while scrolling
-          backgroundPosition: 'center', // Centers the background image
-          minHeight: '100vh', // Ensures the body takes at least the full viewport height
+          backgroundImage: "url(/videos/trueNorthBG.webp)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
         }}
       >
         <QueryProvider>

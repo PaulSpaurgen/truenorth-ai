@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@/lib/hooks/useUser';
+// import { useUser } from '@/lib/hooks/useUser';
 
 export interface AstroData {
   year: number;
@@ -169,17 +169,17 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
   return (
     <div className=" min-h-screen flex items-center justify-center px-4">
       <div className="bg-[#0E1014] rounded-lg shadow-lg p-6 sm:p-8 w-full sm:max-w-[90%] md:max-w-2xl border border-gray-700 flex flex-col justify-center">
-        <h2 className="text-3xl sm:text-4xl text-[#F1C4A4] mb-2 text-center" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+        <h2 className="text-3xl sm:text-4xl text-[#F1C4A4] mb-2 text-center">
           Birth Details
         </h2>
-        <p className="text-lg sm:text-xl text-center text-white mb-6" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+        <p className="text-lg sm:text-xl text-center text-white mb-6" >
           Please enter your birth details to get started
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             <div>
-              <label className="block text-sm font-medium text-white mb-1" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+              <label className="block text-sm font-medium text-white mb-1" >
                 Year
               </label>
               <input
@@ -195,7 +195,7 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-1" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+              <label className="block text-sm font-medium text-white mb-1" >
                 Month
               </label>
               <select
@@ -214,7 +214,7 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-1" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+              <label className="block text-sm font-medium text-white mb-1" >
                 Date
               </label>
               <input
@@ -231,7 +231,7 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
           </div>
 
           <div className="relative location-search-container">
-            <label className="block text-sm font-medium text-white mb-1 mt-6" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+            <label className="block text-sm font-medium text-white mb-1 mt-6" >
               Location
             </label>
             <div className="relative">
@@ -241,7 +241,7 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
                 onChange={handleLocationSearch}
                 placeholder="Search for a place (City, State, Country)"
                 className="w-full p-2 border border-gray-700 rounded-md text-white placeholder-gray-400 bg-[#1a1a1a] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                style={{ fontFamily: 'montserrat,serif, Georgia' }}
+                
                 required
               />
               {isSearching && (
@@ -271,7 +271,7 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
           <button
             type="submit"
             className="w-full bg-[#3a6f7c] text-white py-3 px-4 rounded-md focus:ring-blue-500 focus:ring-offset-2  font-medium hover:bg-[#2a4f5c] transition-colors"
-            style={{ fontFamily: 'montserrat,serif, Georgia' }}
+           
           >
             Submit Birth Details
           </button>

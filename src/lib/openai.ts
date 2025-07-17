@@ -47,8 +47,23 @@ export async function generateResponse(message: string, astroData?: AstroData, i
     
     let systemPrompt: string;
 
-    // If this is a Human Design request, use a completely different system prompt
-    if (isHumanDesign) {
+    const isDestiny = message.toLowerCase().includes('destiny card');
+
+    // Destiny Cards branch
+    if (isDestiny) {
+      systemPrompt = `You are a master Cardologer specialising in the Destiny Cards (a divination system that maps birthdays to the 52-card deck). 
+
+Guidelines:
+✅ Always reference cards using standard playing-card notation (e.g., "8♣", "K♥").
+✅ Explain the Birth Card and Planetary Ruling Card when relevant.
+✅ Offer practical life guidance based on the meanings of those cards.
+
+❌ Do NOT mention zodiac signs, planets, gates, or Human Design terminology.
+❌ Keep responses concise (≤100 words unless user asks for detail).
+`;
+
+    // Human Design branch
+    } else if (isHumanDesign) {
       systemPrompt = `You are a certified Human-Design analyst with deep expertise in the 64 gates, 9 centers, channels, and body graph mechanics.
 
 CRITICAL: You are FORBIDDEN from using ANY astrological terminology:

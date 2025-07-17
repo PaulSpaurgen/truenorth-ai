@@ -29,13 +29,11 @@ export default function Onboarding() {
   useEffect(() => {
     if (loading) return;
     
-    // If user is not authenticated, redirect to login
     if (!user) {
       router.push('/login');
       return;
     }
     
-    // If user has already completed onboarding, redirect to dashboard
     if (hasCompletedOnboarding) {
       router.push('/dashboard');
       return;
