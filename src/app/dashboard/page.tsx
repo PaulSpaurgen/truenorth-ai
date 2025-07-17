@@ -4,6 +4,7 @@ import { useUser } from '@/lib/hooks/useUser';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Chat from '@/lib/components/Chat';
+import BgLogo from '@/lib/components/BgLogo';
 type Tab = 'cosmic' | 'astrology' | 'destiny';
 
 export default function Dashboard() {
@@ -49,6 +50,7 @@ export default function Dashboard() {
 
   return (
     <>
+      <BgLogo />
       <div className="flex justify-center w-full fixed top-[10%] md:top-30 z-10">
         <div className="flex  w-[80%] md:w-2/3 lg:w-1/3 border font-light text-xs sm:text-sm lg:text-md  bg-gray-900/50 top-0 z-10">
           <button
