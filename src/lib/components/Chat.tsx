@@ -65,12 +65,7 @@ export default function ChatPage() {
       timestamp: new Date(),
     };
 
-    // const aiWelcomeMessage: Message = {
-    //     id: 'welcome',
-    //     content: `🌟 Welcome! I'm TrueNorth. I have attuned to your cosmic blueprint. How may I assist you on your journey, ${userName}?`,
-    //     isUser: false,
-    //     timestamp: new Date(),
-    // };
+    
 
     const updatedMessages = hasChatStarted
       ? [...messages, newUserMessage]
@@ -123,24 +118,32 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="text-white  bg-transparent px-50">
-      <div className=" bg-black/50 rounded-2xl shadow-2xl ">
+    <div className="px-[50px] md:px-[150px] text-white bg-transparent">
+        <div className=" bg-black/50 rounded-2xl shadow-2xl ">
         <div
-          className="flex-1 overflow-hidden relative pt-70 pb-16 px-4 sm:px-6 lg:px-8"
-          style={{ fontFamily: "montserrat,serif, Georgia" }}
+          className="flex-1 overflow-hidden relative pt-70 pb-16 px-2 sm:px-6 lg:px-8"
+          style={{ minWidth: "0", width: "100vw", maxWidth: "100%", boxSizing: "border-box", fontFamily: "montserrat,serif, Georgia" }}
         >
           {!hasChatStarted ? (
-            <div className="animate-fadeIn flex flex-col items-center justify-center h-full">
+            <div className="animate-fadeIn flex flex-col items-center justify-center h-full px-4 sm:px-8">
               <h1
-                className="text-5xl font-serif text-[#F1C4A4]"
-                style={{ fontFamily: "montserrat,serif, Georgia" }}
+                className="font-serif text-[#F1C4A4] text-center"
+                style={{
+                  fontFamily: "montserrat,serif, Georgia",
+                  fontSize: "clamp(2rem, 6vw, 3rem)",
+                }}
               >{`Hi, ${userName}`}</h1>
-              <p className="mt-2 text-lg text-gray-300">
+              <p
+                className="mt-2 text-gray-300 text-center"
+                style={{
+                  fontSize: "clamp(1rem, 3vw, 1.25rem)",
+                }}
+              >
                 Discover your Cosmic Blueprint!
               </p>
             </div>
           ) : (
-            <div className="p-4 space-y-4 animate-fadeInUp max-w-2xl mx-auto">
+            <div className="p-4 space-y-4 animate-fadeInUp max-w-2xl mx-auto" style={{ fontFamily: "Cormorant Garamond, serif" }}>
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -148,10 +151,10 @@ export default function ChatPage() {
                 >
                   <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"}`}>
                     <div
-                      className={`max-w-[80%] p-3 rounded-[10px] ${
+                      className={`max-w-[80%] px-1.5 py-1 rounded-[5px] ${
                         message.isUser
-                          ? "bg-[#00A79D] text-white"
-                          : "bg-gray-800 text-white"
+                          ? "bg-[#1B5C65] text-white"
+                          : "bg-[#0E1014] text-white"
                       }`}
                     >
                       <p className="whitespace-pre-wrap">{message.content}</p>

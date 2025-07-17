@@ -34,7 +34,6 @@ export default function Onboarding() {
       return;
     }
     
-    // If user has already completed onboarding, redirect to dashboard
     if (hasCompletedOnboarding) {
       router.push('/dashboard');
       return;
