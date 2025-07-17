@@ -50,19 +50,20 @@ export default function Dashboard() {
   return (
     <>
       <div className="flex justify-center w-full fixed top-30 z-10">
-        <div className="flex w-1/3 border bg-gray-900/50 top-0 z-10">
+        <div className="flex w-2/3 md:w-2/3 lg:w-1/3 border bg-gray-900/50 top-0 z-10">
           <button
             onClick={() => setActiveTab('cosmic')}
-            className={`px-4 flex-1 py-1.5 border text-md transition-colors cursor-pointer relative z-20 ${activeTab === 'cosmic' ? 'text-[#F1C4A4] border-[#1B5C65]' : 'text-white border-gray-900 '}`}
+            className={`px-4 flex-1 py-1.5 border text-md transition-colors cursor-pointer relative
+              ${activeTab === 'cosmic' ? 'z-30 text-[#F1C4A4] border-[#1B5C65]' : 'z-20 text-white border-gray-900'}`}
             style={{ fontFamily: 'serif' }}
           >
             Cosmic
           </button>
-          
 
           <button
             onClick={() => setActiveTab('astrology')}
-            className={`px-4 flex-1 py-1.5 border text-md transition-colors cursor-pointer relative z-20 ${activeTab === 'astrology' ? 'text-[#F1C4A4] border-[#1B5C65]' : 'text-white border-gray-900 '}`}
+            className={`px-4 flex-1 py-1.5 border -ml-px text-md transition-colors cursor-pointer relative
+              ${activeTab === 'astrology' ? 'z-30 text-[#F1C4A4] border-[#1B5C65]' : 'z-10 text-white border-gray-900'}`}
             style={{ fontFamily: 'serif' }}
           >
             Astrology
@@ -70,13 +71,13 @@ export default function Dashboard() {
 
           <button
             onClick={() => setActiveTab('human-design')}
-            className={`px-4 flex-1 py-1.5 border text-md transition-colors cursor-pointer relative z-20 ${activeTab === 'human-design' ? 'text-[#F1C4A4] border-[#1B5C65]' : 'text-white border-gray-900 '}`}
+            
+            className={`px-4 flex-1 py-1.5 border -ml-px text-md transition-colors cursor-pointer relative
+              ${activeTab === 'human-design' ? 'z-30 text-[#F1C4A4] border-[#1B5C65]' : 'z-0 text-white border-gray-900'}`}
             style={{ fontFamily: 'serif' }}
           >
             Cards System
           </button>
-
-          
         </div>
       </div>
       <Chat />
