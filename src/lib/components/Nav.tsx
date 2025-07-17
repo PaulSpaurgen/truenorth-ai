@@ -42,49 +42,107 @@ export default function Nav() {
           )}
         </div> */}
         {user && (
-          <div className=" justify-between items-center w-full  fixed top-0 left-0 right-0 flex p-3 bg-[#0E1014] shadow-sm z-10 border-b-[0.3px] border-b-white">
-          <button
-              className="flex items-center gap-2 text-white rounded py-2 px-3 font-medium hover:bg-[#2a4f5c] transition-colors"
-              style={{ fontFamily: "montserrat,serif, Georgia" }}
+          <div className="flex justify-between items-center w-full fixed top-0 left-0 right-0 p-2 sm:p-3 bg-[#0E1014] shadow-sm z-10 border-b-[0.3px] border-b-white"
+            style={{
+              minHeight: "clamp(48px, 7vw, 72px)",
+              paddingRight: "clamp(0.5rem, 3vw, 2.5rem)",
+            }}
+          >
+            <button
+              className="flex items-center gap-2 text-white rounded py-1.5 px-2 sm:py-2 sm:px-3 font-medium hover:bg-[#2a4f5c] transition-colors"
+              style={{
+                fontFamily: "montserrat,serif, Georgia",
+                fontSize: "clamp(0.75rem, 2vw, 0.95rem)",
+                maxWidth: "clamp(220px, 50vw, 400px)",
+                overflow: "visible",
+                whiteSpace: "nowrap",
+              }}
             >
-              {userPhotoURL ? (
+              {userPhotoURL && (
                 <Image
                   src={userPhotoURL}
                   alt={userName}
-                  width={32} 
-                  height={32} 
-                  className="rounded-full object-cover"
+                  width={28}
+                  height={28}
+                  className="rounded-full"
+                  style={{
+                    width: "clamp(1.7rem, 4vw, 2.1rem)",
+                    height: "clamp(1.7rem, 4vw, 2.1rem)",
+                  }}
                 />
-              ) : (
-                // Fallback for no profile picture (e.g., a simple circle or initial)
-                <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold">
-                  {userName.charAt(0).toUpperCase()}
-                </div>
               )}
-              {userName}
+              <span
+                style={{
+                  fontSize: "clamp(0.6rem, 2vw, 0.95rem)",
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                  whiteSpace: "nowrap",
+                  overflow: "visible",
+                  textOverflow: "unset",
+                  maxWidth: "none",
+                }}
+              >
+                {userName}
+              </span>
             </button>
-        
-          
-          <div className="flex flex-row items-center ml-[-40px]">
-          <img src="/star.svg" alt="Star Logo" className="h-8 w-auto mr-2" />
-          <p className="text-white text-4xl"
-          style={{ fontFamily: 'montserrat,serif, Georgia' }}
-          >TrueNorth</p>
+
+            <div className="flex flex-row items-center mx-2 sm:mx-0">
+              <img
+                src="/star.svg"
+                alt="Star Logo"
+                className="h-7 w-auto sm:h-8 mr-1 sm:mr-2"
+                style={{
+                  height: "clamp(1.5rem, 4vw, 2.25rem)",
+                  minWidth: "clamp(1.5rem, 4vw, 2.25rem)",
+                }}
+              />
+              <p
+                className="text-white"
+                style={{
+                  fontFamily: "montserrat,serif, Georgia",
+                  fontSize: "clamp(1rem, 5vw, 2.5rem)",
+                  lineHeight: 1.1,
+                  letterSpacing: "0.01em",
+                  fontWeight: 500,
+                  marginBottom: 0,
+                }}
+              >
+                TrueNorth
+              </p>
+            </div>
+
+            <div className="flex-shrink-0">
+              <button
+                onClick={handleSignOut}
+                className="text-white px-3 sm:px-4 py-1 border border-white font-medium hover:bg-[#2a4f5c] transition-colors flex items-center gap-2"
+                style={{
+                  fontFamily: "montserrat,serif, Georgia",
+                  fontSize: "clamp(0.95rem, 2.5vw, 1.1rem)",
+                  
+                }}
+              >
+                <span className="hidden md:inline">Sign Out</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  style={{
+                    height: "clamp(1.1rem, 3vw, 1.25rem)",
+                    width: "clamp(1.1rem, 3vw, 1.25rem)",
+                  }}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="#F1C4A5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
-        
-          <div>
-          <button
-              onClick={handleSignOut}
-              className="text-white px-4 py-0.5 border border-white font-medium hover:bg-[#2a4f5c] transition-colors flex items-center gap-2"
-              style={{ fontFamily: 'montserrat,serif, Georgia' }}
-            >
-              Sign Out
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="#F1C4A5">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
-              </svg>
-            </button>
-          </div>
-        </div>
         )}
       </div>
     </div>
