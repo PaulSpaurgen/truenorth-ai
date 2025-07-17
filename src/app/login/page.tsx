@@ -62,13 +62,31 @@ function LoginContent() {
         <div className={`absolute inset-0 flex flex-col items-center justify-center p-8 transition-all duration-700 ease-in-out ${!showLoginOptions ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
           <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto flex flex-col items-center "> 
             <Image src="/star.svg" alt="TrueNorth" className="mb-4 h-12" width={48} height={48} />
-            <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[80px] font-normal mb-2 text-[#F1C4A4]" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
-            <p className="text-lg sm:text-xl md:text-2xl mb-6 text-white" style={{ fontFamily: 'Times New Roman, serif' }}>The Sacred Return to Who We&apos;ve Always Been</p>
             
+            
+            <h1
+              className="font-normal mb-2 text-[#F1C4A4]"
+              style={{
+                fontFamily: 'montserrat,serif, Georgia',
+                fontSize: 'clamp(2.5rem, 8vw, 5rem)'
+              }}
+            >
+              TrueNorth
+            </h1>
+            
+            
+            <p
+              className="mb-6 text-white"
+              style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: 'clamp(1.03rem, 3vw, 1.7rem)'
+              }}
+            >
+              The Sacred Return to Who We&apos;ve Always Been
+            </p>
             <iframe 
               src="https://lottie.host/embed/112e77db-c31e-42a2-abcc-3c4fd4e5286f/SYJt4jekgg.lottie" 
               className="h-16 w-full max-w-[200px] sm:max-w-sm md:max-w-md lg:max-w-lg mb-6" 
-              frameBorder="0" 
               allowFullScreen
             ></iframe>
 
@@ -79,10 +97,22 @@ function LoginContent() {
             >
               Begin Your Journey
             </button>
-            <p className="text-base sm:text-lg whitespace-nowrap text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+            <p
+              className="whitespace-nowrap text-white"
+              style={{
+                fontFamily: 'montserrat,serif, Georgia',
+                fontSize: 'clamp(0.65rem, 3vw, 1.125rem)'
+              }}
+            >
               Discover your cosmic blueprint and navigate life&apos;s journey with clarity and purpose.
             </p>
-            <p className="text-base sm:text-lg whitespace-nowrap text-[#F1C4A4]" style={{ fontFamily: 'montserrat,serif, Georgia' }}>
+            <p
+              className="whitespace-nowrap text-[#F1C4A4]"
+              style={{
+                fontFamily: 'montserrat,serif, Georgia',
+                fontSize: 'clamp(0.65rem, 3vw, 1.125rem)'
+              }}
+            >
               TrueNorth connects you to the ancient wisdom of the stars.
             </p>
           </div>
@@ -94,13 +124,24 @@ function LoginContent() {
             
             <div className="flex items-center justify-center mb-6">
               <Image src="/star.svg" alt="TrueNorth Logo" className="h-8 w-8 mr-2" width={32} height={32} />
-              <h1 className="text-2xl sm:text-3xl text-white" style={{ fontFamily: 'montserrat,serif, Georgia' }}>TrueNorth</h1>
+              <h1
+                className="text-2xl sm:text-3xl text-white"
+                style={{
+                  fontFamily: 'montserrat,serif, Georgia',
+                  fontSize: 'clamp(1.3rem, 4vw, 2.2rem)'
+                }}
+              >
+                TrueNorth
+              </h1>
             </div>
             
             <div className="flex w-full mb-6 border-b-[0.3px] border-gray-700">
               <button 
-                className="flex-1 pb-2 text-base sm:text-lg border-b-1 border-[#3a6f7c] text-white"
-                style={{ fontFamily: 'montserrat,serif, Georgia' }}
+                className="flex-1 pb-2 border-b-1 border-[#3a6f7c] text-white"
+                style={{ 
+                  fontFamily: 'montserrat,serif, Georgia',
+                  fontSize: 'clamp(1rem, 2.5vw, 1.25rem)'
+                }}
               >
                 Sign In
               </button>

@@ -21,7 +21,8 @@ export default function Nav() {
 
   return (
     <div>
-<div className="fixed top-0 left-0 right-0 flex p-3 bg-[#0E1014] shadow-sm z-10 border-b-[0.3px] border-b-white">        {/* <div className="flex items-center space-x-4">
+<div className="">   
+       {/* <div className="flex items-center space-x-4">
           
           {user && (
             <>
@@ -41,7 +42,7 @@ export default function Nav() {
           )}
         </div> */}
         {user && (
-          <div className="flex justify-between items-center w-full ">
+          <div className=" justify-between items-center w-full  fixed top-0 left-0 right-0 flex p-3 bg-[#0E1014] shadow-sm z-10 border-b-[0.3px] border-b-white">
           <button
               className="flex items-center gap-2 text-white rounded py-2 px-3 font-medium hover:bg-[#2a4f5c] transition-colors"
               style={{ fontFamily: "montserrat,serif, Georgia" }}
