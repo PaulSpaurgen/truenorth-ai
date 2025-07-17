@@ -1,10 +1,83 @@
 @import "tailwindcss";
 @import url(/public/trueNorthBG.webp);
 
-:root {
+/* .main-bg{
     background-image: ('./public/trueNorthBG.webp');
     background-clip: border-box;
     background-size: cover;
     background-position: center;
+} */
+
+/* Custom Scrollbar Styles */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-\[#1B5C65\] {
+    scrollbar-color: #1B5C65 transparent;
+  }
+  
+  .scrollbar-track-gray-900\/30 {
+    scrollbar-color: transparent rgba(17, 24, 39, 0.3);
+  }
+  
+  .scrollbar-thumb-rounded-full {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-track-rounded-full {
+    scrollbar-width: thin;
+  }
+  
+  .hover\:scrollbar-thumb-\[#00A79D\]:hover {
+    scrollbar-color: #00A79D transparent;
+  }
+}
+
+/* Webkit Scrollbar Styles for Chrome/Safari */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1B5C65;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00A79D;
+}
+
+/* Custom scrollbar for chat container */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.1);
+  border-radius: 4px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: #1B5C65;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  will-change: background-color;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #00A79D;
+}
+
+/* Prevent scrollbar flickering during animations */
+.chat-scrollbar {
+  contain: layout style paint;
 }
 
