@@ -126,7 +126,7 @@ export default function ChatPage() {
     <div className="text-white  bg-transparent px-50">
       <div className=" bg-black/50 rounded-2xl shadow-2xl ">
         <div
-          className="flex-1 overflow-hidden relative pt-50 pb-16 px-4 sm:px-6 lg:px-8"
+          className="flex-1 overflow-hidden relative pt-70 pb-16 px-4 sm:px-6 lg:px-8"
           style={{ fontFamily: "montserrat,serif, Georgia" }}
         >
           {!hasChatStarted ? (
@@ -144,20 +144,20 @@ export default function ChatPage() {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${
-                    message.isUser ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}
                 >
-                  <div
-                    className={`max-w-[80%] p-3 rounded-2xl ${
-                      message.isUser
-                        ? "bg-[#00A79D] text-white"
-                        : "bg-gray-800 text-white"
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"}`}>
+                    <div
+                      className={`max-w-[80%] p-3 rounded-[10px] ${
+                        message.isUser
+                          ? "bg-[#00A79D] text-white"
+                          : "bg-gray-800 text-white"
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                    </div>
                     <p
-                      className={`text-xs mt-1.5 ${
+                      className={`text-xs ${
                         message.isUser
                           ? "text-right text-gray-200/70"
                           : "text-left text-gray-400"
@@ -168,6 +168,7 @@ export default function ChatPage() {
                   </div>
                 </div>
               ))}
+
               {isTyping && (
                 <div className="flex justify-start">
                   <div className="bg-gray-800 rounded-2xl p-3 max-w-[80%] text-white">

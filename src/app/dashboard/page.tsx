@@ -3,7 +3,7 @@
 import { useUser } from '@/lib/hooks/useUser';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Chat from '@/lib/components/Chat'; // Ensure this path is correct
+import Chat from '@/lib/components/Chat';
 type Tab = 'cosmic' | 'astrology' | 'human-design';
 
 export default function Dashboard() {
@@ -13,14 +13,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (loading) return;
-    
-    // If user is not authenticated, redirect to login
+
     if (!user) {
       router.push('/login');
       return;
     }
-    
-    // If user hasn't completed onboarding, redirect to onboarding
+
     if (!hasCompletedOnboarding) {
       router.push('/onboarding');
       return;
@@ -51,28 +49,35 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="flex justify-center w-full fixed top-16 z-10">
-          <div className="flex w-fit border border-gray-700 bg-gray-900/50  top-0 z-10 ">
-            <button
-              onClick={() => setActiveTab('cosmic')}
-              className={`px-4 py-1.5 border-r border-gray-700  text-md transition-colors cursor-pointer ${activeTab === 'cosmic' ? ' text-[#F1C4A4]' : 'text-white hover:bg-gray-800/50 '} `}
-              style={{ fontFamily: 'serif' }}
-            >
-              Cosmic
-            </button>
-            <button
-              onClick={() => setActiveTab('astrology')}
-              className={`px-4 py-1.5 border-r border-gray-700  text-md transition-colors cursor-pointer ${activeTab === 'astrology' ? ' text-[#F1C4A4]' : 'text-white hover:bg-gray-800/50'}`}
-            >
-              Astrology
-            </button>
-            <button
-              onClick={() => setActiveTab('human-design')}
-              className={`px-4 py-1.5 border-r border-gray-700  text-md transition-colors cursor-pointer ${activeTab === 'human-design' ? ' text-[#F1C4A4]' : 'text-white hover:bg-gray-800/50'}`}
-            >
-               Cards System
-            </button>
-          </div>
+      <div className="flex justify-center w-full fixed top-30 z-10">
+        <div className="flex w-1/3 border bg-gray-900/50 top-0 z-10">
+          <button
+            onClick={() => setActiveTab('cosmic')}
+            className={`px-4 flex-1 py-1.5 border text-md transition-colors cursor-pointer relative z-20 ${activeTab === 'cosmic' ? 'text-[#F1C4A4] border-[#1B5C65]' : 'text-white border-gray-900 '}`}
+            style={{ fontFamily: 'serif' }}
+          >
+            Cosmic
+          </button>
+          
+
+          <button
+            onClick={() => setActiveTab('astrology')}
+            className={`px-4 flex-1 py-1.5 border text-md transition-colors cursor-pointer relative z-20 ${activeTab === 'astrology' ? 'text-[#F1C4A4] border-[#1B5C65]' : 'text-white border-gray-900 '}`}
+            style={{ fontFamily: 'serif' }}
+          >
+            Astrology
+          </button>
+
+          <button
+            onClick={() => setActiveTab('human-design')}
+            className={`px-4 flex-1 py-1.5 border text-md transition-colors cursor-pointer relative z-20 ${activeTab === 'human-design' ? 'text-[#F1C4A4] border-[#1B5C65]' : 'text-white border-gray-900 '}`}
+            style={{ fontFamily: 'serif' }}
+          >
+            Cards System
+          </button>
+
+          
+        </div>
       </div>
       <Chat />
     </>
