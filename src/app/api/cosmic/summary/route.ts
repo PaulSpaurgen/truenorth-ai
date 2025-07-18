@@ -19,7 +19,7 @@ export const GET = withAuth(async (_req: Request, user: DecodedIdToken) => {
     const natalData = userData.astroDetails;
 
     // Build minimal prompt – request a very short summary for snappier UX
-    const prompt = `Provide a punchy integrated synthesis (≤100 words) that blends this person's Astrology and Human Design profile with today's planetary influences. Finish with one actionable tip.`;
+    const prompt = `Provide a punchy integrated synthesis (≤100 words) that blends this person's Astrology and Destiny Cards profile with today's planetary influences. Finish with one actionable tip.`;
 
     const summary = await generateResponse(prompt, natalData);
 
