@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTabSummary } from "@/lib/hooks/useTabSummary";
 import { useRef } from "react";
 
+
 interface Message {
   id: string;
   content: string;
@@ -17,6 +18,10 @@ type ChatTab = 'cosmic' | 'astrology' | 'destiny';
 
 interface ChatProps {
   activeTab: ChatTab;
+  showMetadata?: boolean;
+  isSummaryAssistant?: boolean;
+  defaultSummary?: string;
+  setContextMessage?: (contextMessage: string) => void;
 }
 
 const SendIcon = () => (
@@ -114,7 +119,7 @@ const CosmicLoading = () => (
 
 // MODULE cache no longer needed – handled by React Query
 
-export default function Chat({ activeTab }: ChatProps) {
+export default function Chat({ activeTab , showMetadata = true , defaultSummary = "" , isSummaryAssistant = true , setContextMessage }: ChatProps) {
   const [user, setUser] = useState<User | null>(null);
   const [messagesMap, setMessagesMap] = useState<Record<ChatTab, Message[]>>({
     cosmic: [],
@@ -127,7 +132,8 @@ export default function Chat({ activeTab }: ChatProps) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const { data: summary, isLoading: summaryLoading } = useTabSummary(activeTab);
+  const { data: summaryData, isLoading: summaryLoading } = useTabSummary(activeTab);
+  const summary = isSummaryAssistant ? summaryData : null;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const userName = user?.displayName || user?.email || "Cosmic Voyager";
@@ -184,7 +190,7 @@ export default function Chat({ activeTab }: ChatProps) {
           }
         : null;
 
-      updatedMessages = summaryAssistant
+      updatedMessages = isSummaryAssistant && summaryAssistant
         ? [...messages, summaryAssistant, newUserMessage]
         : [...messages, newUserMessage];
     }
@@ -204,7 +210,7 @@ export default function Chat({ activeTab }: ChatProps) {
       // Build chat history from last messages (summary already included if first message)
       const chatHistory = updatedMessages.slice(-7).map((m) => ({
         role: m.isUser ? 'user' : ('assistant' as const),
-        content: m.content,
+        content: m.content + (defaultSummary.length > 0 ? `\n\n${defaultSummary}` : ""),
       }));
 
       const body = { messages: chatHistory };
@@ -225,7 +231,10 @@ export default function Chat({ activeTab }: ChatProps) {
         timestamp: new Date(),
       };
 
+      setContextMessage?.([...messages, aiResponseMessage].map((m) => m.content).join("\n"));
+
       setMessagesMap((prev) => ({ ...prev, [activeTab]: [...prev[activeTab], aiResponseMessage] }));
+   
     } catch (error) {
       console.error("Error:", error);
       const errorResponseMessage: Message = {
@@ -243,6 +252,7 @@ export default function Chat({ activeTab }: ChatProps) {
   };
 
   const formatTime = (date: Date) => {
+    if (!date) return "";
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
@@ -262,7 +272,7 @@ export default function Chat({ activeTab }: ChatProps) {
   return (
     <>
       <div className={`max-h-[calc(100vh-300px)] md:max-h-[calc(100vh-400px)]  max-w-4xl mx-auto chat-scrollbar ${hasChatStarted ? "overflow-y-auto " : "overflow-y-auto"}`}>
-        {!hasChatStarted ? (
+        {!hasChatStarted && showMetadata ? (
           <div
             className="h-full w-full"
             style={{

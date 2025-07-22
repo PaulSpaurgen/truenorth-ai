@@ -1,15 +1,16 @@
 'use client';
 
 import { useUser } from "@/lib/hooks/useUser";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import {  useState } from "react";
 import AstroForm, { AstroData } from "@/lib/components/AstroForm";
 
 export default function Onboarding() {
   const { user, loading, hasCompletedOnboarding, setIsNewUser, setUser } = useUser();
-  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (data: AstroData) => {
+    setIsLoading(true);
     const response = await fetch('/api/saveUserData', {
       headers: {
         'Content-Type': 'application/json',
@@ -22,30 +23,16 @@ export default function Onboarding() {
     if (res.success) {
       setIsNewUser(false);
       setUser(res.user);
-      router.push('/dashboard');
     }
+    setIsLoading(false);
   }
-
-  useEffect(() => {
-    if (loading) return;
-    
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    
-    if (hasCompletedOnboarding) {
-      router.push('/dashboard');
-      return;
-    }
-  }, [user, loading, hasCompletedOnboarding, router]);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white">Loading...</p>
         </div>
       </div>
     );
@@ -62,5 +49,5 @@ export default function Onboarding() {
     );
   }
 
-  return <AstroForm onSubmit={handleSubmit} />;
+  return <AstroForm onSubmit={handleSubmit} isLoading={isLoading} />;
 }   

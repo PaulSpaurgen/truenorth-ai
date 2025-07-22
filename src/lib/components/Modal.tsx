@@ -18,17 +18,17 @@ export default function Modal({ open, onClose, children, title }: ModalProps) {
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative bg-white w-full max-w-3xl mx-4 rounded-lg shadow-lg overflow-hidden animate-fade-in">
-        <div className="flex justify-between items-center p-4 border-b bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-          <h3 className="text-lg font-semibold">{title}</h3>
+      <div className="relative bg-[#0E1014] border border-gray-700 w-full max-w-4xl mx-4 rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+        <div className="flex justify-between items-center p-6 border-b border-gray-700 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+          <h3 className="text-xl font-semibold">{title}</h3>
           <button
             onClick={onClose}
-            className="text-white hover:text-gray-200 text-2xl leading-none"
+            className="text-white hover:text-gray-200 text-2xl cursor-pointer leading-none transition-colors"
           >
             &times;
           </button>
         </div>
-        <div className="p-4 max-h-[80vh] overflow-y-auto">{children}</div>
+        <div className="p-6 max-h-[80vh] overflow-y-auto text-white">{children}</div>
       </div>
     </div>
   );

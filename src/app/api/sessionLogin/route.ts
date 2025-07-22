@@ -31,6 +31,8 @@ export async function POST(req: Request) {
       name: decoded.name,
       photoURL: decoded.picture,
       astroDetails: {},
+      destinyCard: {},
+      birthData: {}
     }
     if (!user) {
       await User.create(defaultUser);
@@ -46,7 +48,19 @@ export async function POST(req: Request) {
     try {
       const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn });
       
-      const res = NextResponse.json({ success: true, isNewUser , user : user || defaultUser });
+      const userResponse = user || defaultUser;
+      const res = NextResponse.json({ 
+        success: true, 
+        isNewUser, 
+        user: {
+          name: userResponse.name,
+          email: userResponse.email,
+          photoURL: userResponse.photoURL,
+          astroDetails: userResponse.astroDetails,
+          destinyCard: userResponse.destinyCard,
+          birthData: userResponse.birthData
+        }
+      });
       res.cookies.set('token', sessionCookie, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -58,7 +72,18 @@ export async function POST(req: Request) {
     } catch (sessionError) {
       console.error('Error creating session cookie:', sessionError);
       // Fallback to storing the ID token directly (with shorter expiry)
-      const res = NextResponse.json({ success: true, isNewUser });
+      const userResponse = user || defaultUser;
+      const res = NextResponse.json({ 
+        success: true, 
+        isNewUser,
+        user: {
+          name: userResponse.name,
+          email: userResponse.email,
+          photoURL: userResponse.photoURL,
+          astroDetails: userResponse.astroDetails,
+          destinyCard: userResponse.destinyCard
+        }
+      });
       res.cookies.set('token', idToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

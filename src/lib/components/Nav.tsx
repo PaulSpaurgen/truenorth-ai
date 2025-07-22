@@ -5,12 +5,13 @@ import { auth } from "../firebaseClient";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Logo from "./Logo";
+import { FaHome } from "react-icons/fa";
 
 export default function Nav() {
   const router = useRouter();
   const { user } = useUser();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const userName = user?.displayName || (user as any)?.name || user?.email || 'User';
+
+  const userName = user?.name || user?.email || "User";
   const userPhotoURL = user?.photoURL;
 
   const handleSignOut = async () => {
@@ -22,7 +23,11 @@ export default function Nav() {
     <div className="fixed top-0 left-0 right-0 z-10">
       {user && (
         <div className="flex justify-between items-center w-full  p-2 sm:px-3 sm:py-4 bg-[#0E1014] shadow-sm z-10 border-b-[0.1px] border-b-gray-800">
-          <button className="flex items-center gap-2 text-white text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 font-light transition-colors cursor-pointer hover:bg-[#2a4f5c]">
+          <div className="flex items-center gap-2">
+          <button
+            className="flex items-center gap-2 text-white text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 font-light transition-colors cursor-pointer hover:bg-[#2a4f5c]"
+            onClick={() => router.push("/profile")}
+          >
             {userPhotoURL && (
               <Image
                 src={userPhotoURL}
@@ -34,7 +39,14 @@ export default function Nav() {
             )}
             <span className="hidden sm:inline">{userName}</span>
           </button>
-          <Logo  />
+          <button
+            className="flex items-center gap-2 text-white text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4 font-light transition-colors cursor-pointer hover:bg-[#2a4f5c]"
+            onClick={() => router.push("/dashboard")}
+          >
+            <FaHome className="text-[#F1C4A5] text-[16px]" />
+          </button>
+          </div>
+          <Logo />
 
           <div className="flex-shrink-0">
             <button

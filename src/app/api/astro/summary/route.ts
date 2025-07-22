@@ -5,21 +5,25 @@ import { generateResponse } from '@/lib/openai';
 import User from '@/models/User';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 
-export const GET = withAuth(async (_req: Request, user: DecodedIdToken) => {
+export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
   try {
     await dbConnect();
 
     const uid = user.uid;
     const userData = await User.findOne({ uid });
+    const { contextMessage } = await req.json();
     if (!userData?.astroDetails) {
       return NextResponse.json({ error: 'No birth chart data found' }, { status: 400 });
     }
+    
+    
 
-    const natalData = userData.astroDetails;
+    let prompt = `Based on the user's birth chart data, provide a concise (≤80 words) astrology snapshot. Include their specific Sun sign, Moon sign, and Ascendant sign with brief interpretations. Mention one current transit and its practical impact. End with one actionable tip. Use actual zodiac sign names, not placeholders.`;
+    if (contextMessage) {
+      prompt = `Based on the user's birth chart data, provide a concise (≤80 words) astrology snapshot. Include their specific Sun sign, Moon sign, and Ascendant sign with brief interpretations. Mention one current transit and its practical impact. End with one actionable tip. The user's message is: ${contextMessage} Only use the context if it is relevant to the astrology reading. Use actual zodiac sign names, not placeholders.`;
+    }
 
-    const prompt = `Provide a concise (≤80 words) astrology snapshot highlighting Sun, Moon, Ascendant and today's key transit. End with one practical tip.`;
-
-    const summary = await generateResponse(prompt, natalData);
+    const summary = await generateResponse(prompt, userData, 'astro');
 
     return NextResponse.json({ summary });
   } catch (error) {

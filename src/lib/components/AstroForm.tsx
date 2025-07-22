@@ -22,6 +22,7 @@ export interface AstroData {
 interface AstroFormProps {
   onSubmit: (data: AstroData) => void;
   initialData?: Partial<AstroData>;
+  isLoading?: boolean;
 }
 
 interface LocationSuggestion {
@@ -31,7 +32,7 @@ interface LocationSuggestion {
   place_id: string;
 }
 
-export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
+export default function AstroForm({ onSubmit, initialData , isLoading = false }: AstroFormProps) {
   // const { user } = useUser(); // Removed unused variable
 
   const defaultData: AstroData = {
@@ -270,10 +271,10 @@ export default function AstroForm({ onSubmit, initialData }: AstroFormProps) {
 
           <button
             type="submit"
-            className="w-full bg-[#3a6f7c] text-white py-3 px-4 rounded-md focus:ring-blue-500 focus:ring-offset-2  font-medium hover:bg-[#2a4f5c] transition-colors"
-           
+            className=" cursor-pointer w-full bg-[#3a6f7c] text-white py-3 px-4 rounded-md focus:ring-blue-500 focus:ring-offset-2  font-medium hover:bg-[#2a4f5c] transition-colors"
+            disabled={isLoading}
           >
-            Submit Birth Details
+            {isLoading ? 'Loading...' : 'Submit Birth Details'}
           </button>
         </form>
       </div>

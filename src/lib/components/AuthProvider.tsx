@@ -1,10 +1,19 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { User as FirebaseUser, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createContext, useContext, useEffect, useState , useRef } from 'react';
+import {  onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebaseClient';
+import { useRouter, usePathname } from 'next/navigation';
 
-type AppUser = FirebaseUser & { astroDetails?: unknown };
+export type AppUser = {
+  uid: string;
+  email: string;
+  name: string;
+  photoURL: string;
+  astroDetails: unknown;
+  destinyCard: unknown;
+  birthData: unknown;
+}
 
 interface AuthContextType {
   user: AppUser | null;
@@ -31,6 +40,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
   const [sessionEstablished, setSessionEstablished] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const isSeesionLoginInProgress = useRef(false);
+
+ 
+
+  // Handle routing based on auth state
+  useEffect(() => {
+    if (loading) return; // Wait for auth to initialize
+
+    console.log('🔐 AuthProvider - Routing check:', {
+      pathname,
+      user: !!user,
+      isNewUser
+    });
+
+    // Public routes that don't need auth
+    const publicRoutes = ['/login', '/onboarding'];
+    const isPublicRoute = publicRoutes.includes(pathname);
+    const isOnboardingCompleted = user?.astroDetails && Object.keys(user?.astroDetails).length > 0;
+
+    if (!user) {
+      // User not authenticated
+      if (!isPublicRoute && pathname !== '/') {
+        console.log('🔐 AuthProvider - No user, redirecting to login');
+        router.push('/login');
+      }
+      return;
+    }
+
+    // User is authenticated
+    if (isNewUser && pathname !== '/onboarding') {
+      // New user needs onboarding
+      console.log('🔐 AuthProvider - New user, redirecting to onboarding');
+      router.push('/onboarding');
+      return;
+    }
+
+    
+
+    // User is authenticated and has completed onboarding
+    if (pathname === '/' || pathname === '/login' || pathname === '/onboarding' && isOnboardingCompleted) {
+      console.log('🔐 AuthProvider - User ready, redirecting to dashboard');
+      router.push('/profile');
+      return;
+    }
+
+  }, [user, loading, isNewUser,pathname, router]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -69,6 +127,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
    const sessionLogin = async (idToken: string) => {
+    if (isSeesionLoginInProgress.current) return;
+    isSeesionLoginInProgress.current = true;
     const response = await fetch('/api/sessionLogin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -82,6 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setUser(data?.user);
     setSessionEstablished(true);
+    isSeesionLoginInProgress.current = false;
    }
 
   const logout = async () => {

@@ -6,7 +6,7 @@ import User from '@/models/User';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 
 // Returns a unified Astro + Human Design summary for today
-export const GET = withAuth(async (_req: Request, user: DecodedIdToken) => {
+export const POST = withAuth(async (_req: Request, user: DecodedIdToken) => {
   try {
     await dbConnect();
     const uid = user.uid;

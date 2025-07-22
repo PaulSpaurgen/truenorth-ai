@@ -3,6 +3,7 @@ import { withAuth } from '@/lib/withAuth';
 import { NextResponse } from 'next/server';
 import User from '@/models/User';
 import type { DecodedIdToken } from 'firebase-admin/auth';
+import { getDestinyCard } from '@/lib/destinyCards';
 
 interface AstroData {
   year: number;
@@ -40,6 +41,8 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
       throw new Error(`API request failed with status: ${response.status}`);
     }
 
+    const destinyCard = getDestinyCard(astroData.month, astroData.date);
+
     const data = await response.json();
     const userData = await User.findOne({ uid });
 
@@ -47,7 +50,16 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
       await dbConnect();
       await User.updateOne(
         { uid },
-        { $set: { astroDetails: data } },
+        { $set: { astroDetails: data?.output , destinyCard , birthData: {
+          year: astroData.year,
+          month: astroData.month,
+          date: astroData.date,
+          hours: astroData.hours,
+          minutes: astroData.minutes,
+          seconds: astroData.seconds,
+          latitude: astroData.latitude,
+          
+        } } },
         { upsert: true }
       );
     }
@@ -55,8 +67,11 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
     return NextResponse.json({
       success: true,
       user: {
-        ...userData,
-        astroDetails: data
+        name: userData?.name,
+        email: userData?.email,
+        photoURL: userData?.photoURL,
+        astroDetails: data?.output,
+        destinyCard: destinyCard
       }
     });
 

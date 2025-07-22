@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense,useState } from 'react';
 import { useUser } from '@/lib/hooks/useUser';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,25 +8,17 @@ import Logo from "@/lib/components/Logo";
 
 function LoginContent() {
   const { user, signInWithGoogle, loading } = useUser();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
-  const router = useRouter();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      router.push(redirectTo);
-    }
-  }, [user, redirectTo, router]);
 
   if (user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-center">
+        {/* <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3a6f7c] mx-auto mb-4"></div>
           <p className="text-gray-200">Redirecting...</p>
-        </div>
+        </div> */}
       </div>
     );
   }
@@ -158,7 +149,7 @@ function LoginContent() {
                 
                 <motion.button
                   onClick={handleGoogleSignIn}
-                  className="w-full flex items-center justify-center text-xs sm:text-sm md:text-lg gap-2 text-white rounded mb-4 py-4"
+                  className="w-full flex items-center justify-center text-xs sm:text-sm md:text-lg gap-2 text-white rounded mb-4 py-4 cursor-pointer"
                   style={{
                     backgroundColor: "#1B5C65",
                     transition: "background-color 0.3s ease, filter 0.3s ease",

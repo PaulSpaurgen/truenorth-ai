@@ -1,8 +1,7 @@
 "use client";
 
-import { useUser } from '@/lib/hooks/useUser';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useUser } from '@/lib/hooks/useUser'
+  import { useState } from 'react';
 import Chat from '@/lib/components/Chat';
 import BgLogo from '@/lib/components/BgLogo';
 type Tab = 'cosmic' | 'astrology' | 'destiny';
@@ -10,21 +9,7 @@ type Tab = 'cosmic' | 'astrology' | 'destiny';
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('cosmic');
   const { user, loading, hasCompletedOnboarding } = useUser();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (loading) return;
-
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-
-    if (!hasCompletedOnboarding) {
-      router.push('/onboarding');
-      return;
-    }
-  }, [user, loading, hasCompletedOnboarding, router]);
 
   if (loading) {
     return (

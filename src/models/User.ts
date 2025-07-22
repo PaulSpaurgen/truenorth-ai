@@ -9,6 +9,14 @@ const UserSchema = new Schema(
     astroDetails: {
       type: Schema.Types.Mixed,
       default: {}
+    },
+    destinyCard: {
+      type: Schema.Types.Mixed,
+      default: {}
+    },
+    birthData: {
+      type: Schema.Types.Mixed,
+      default: {}
     }
   },
   { timestamps: true }
