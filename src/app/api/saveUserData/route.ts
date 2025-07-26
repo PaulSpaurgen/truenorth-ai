@@ -71,7 +71,14 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
         email: userData?.email,
         photoURL: userData?.photoURL,
         astroDetails: data?.output,
-        destinyCard: destinyCard
+        destinyCard: destinyCard,
+        birthData: {
+          year: astroData.year,
+          month: astroData.month,
+          date: astroData.date,
+          hours: astroData.hours,
+          minutes: astroData.minutes,
+        }
       }
     });
 

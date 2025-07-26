@@ -19,18 +19,18 @@ export default function UserMenu() {
         {user.photoURL ? (
           <Image
             src={user.photoURL}
-            alt={user.displayName || 'User'}
+            alt={user.name || 'User'}
             width={32}
             height={32}
             className="rounded-full"
           />
         ) : (
           <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
-            {user.displayName?.[0] || user.email?.[0] || '?'}
+            {user.name?.[0] || user.email?.[0] || '?'}
           </div>
         )}
         <span className="text-sm font-medium text-gray-700 hidden sm:block">
-          {user.displayName || user.email}
+          {user.name || user.email}
         </span>
         <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -46,7 +46,7 @@ export default function UserMenu() {
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-20">
             <div className="p-3 border-b">
               <p className="text-sm font-medium text-gray-900">
-                {user.displayName || 'User'}
+                {user.name || 'User'}
               </p>
               <p className="text-xs text-gray-500">{user.email}</p>
             </div>

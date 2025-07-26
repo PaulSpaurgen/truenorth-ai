@@ -1,9 +1,14 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useEffect, useState , useRef } from 'react';
-import {  onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebaseClient';
-import { useRouter, usePathname } from 'next/navigation';
+import { createContext, useContext, useEffect, useState, useRef } from "react";
+import {
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+} from "firebase/auth";
+import { auth } from "@/lib/firebaseClient";
+import { useRouter, usePathname } from "next/navigation";
 
 export type AppUser = {
   uid: string;
@@ -12,8 +17,14 @@ export type AppUser = {
   photoURL: string;
   astroDetails: unknown;
   destinyCard: unknown;
-  birthData: unknown;
-}
+  birthData: {
+    year: number;
+    month: number;
+    date: number;
+    hours: number;
+    minutes: number;
+  };
+};
 
 interface AuthContextType {
   user: AppUser | null;
@@ -25,12 +36,14 @@ interface AuthContextType {
   setUser: (value: AppUser) => void;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
@@ -45,50 +58,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isSeesionLoginInProgress = useRef(false);
 
- 
-
   // Handle routing based on auth state
   useEffect(() => {
     if (loading) return; // Wait for auth to initialize
 
-    console.log('🔐 AuthProvider - Routing check:', {
+    console.log("🔐 AuthProvider - Routing check:", {
       pathname,
       user: !!user,
-      isNewUser
+      isNewUser,
     });
 
     // Public routes that don't need auth
-    const publicRoutes = ['/login', '/onboarding'];
+    const publicRoutes = ["/login", "/onboarding"];
     const isPublicRoute = publicRoutes.includes(pathname);
-    const isOnboardingCompleted = user?.astroDetails && Object.keys(user?.astroDetails).length > 0;
+    const isOnboardingCompleted =
+      user?.astroDetails && Object.keys(user?.astroDetails).length > 0;
 
     if (!user) {
       // User not authenticated
-      if (!isPublicRoute && pathname !== '/') {
-        console.log('🔐 AuthProvider - No user, redirecting to login');
-        router.push('/login');
+      if (!isPublicRoute && pathname !== "/") {
+        console.log("🔐 AuthProvider - No user, redirecting to login");
+        router.push("/login");
       }
       return;
     }
 
     // User is authenticated
-    if (isNewUser && pathname !== '/onboarding') {
+    if (isNewUser && pathname !== "/onboarding") {
       // New user needs onboarding
-      console.log('🔐 AuthProvider - New user, redirecting to onboarding');
-      router.push('/onboarding');
+      console.log("🔐 AuthProvider - New user, redirecting to onboarding");
+      router.push("/onboarding");
       return;
     }
-
-    
 
     // User is authenticated and has completed onboarding
-    if (pathname === '/' || pathname === '/login' || pathname === '/onboarding' && isOnboardingCompleted) {
-      console.log('🔐 AuthProvider - User ready, redirecting to dashboard');
-      router.push('/profile');
+    if (
+      pathname === "/" ||
+      pathname === "/login" ||
+      (pathname === "/onboarding" && isOnboardingCompleted)
+    ) {
+      console.log("🔐 AuthProvider - User ready, redirecting to dashboard");
+      router.push("/profile");
       return;
     }
-
-  }, [user, loading, isNewUser,pathname, router]);
+  }, [user, loading, isNewUser, pathname, router]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -100,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await sessionLogin(idToken);
             setSessionEstablished(true);
           } catch (error) {
-            console.error('Error establishing session:', error);
+            console.error("Error establishing session:", error);
           }
         }
       } else {
@@ -122,16 +135,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const idToken = await result.user.getIdToken();
       await sessionLogin(idToken);
     } catch (error) {
-      console.error('Error signing in with Google:', error);
+      console.error("Error signing in with Google:", error);
     }
   };
 
-   const sessionLogin = async (idToken: string) => {
+  const sessionLogin = async (idToken: string) => {
     if (isSeesionLoginInProgress.current) return;
     isSeesionLoginInProgress.current = true;
-    const response = await fetch('/api/sessionLogin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("/api/sessionLogin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ idToken }),
     });
     const data = await response.json();
@@ -143,16 +156,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(data?.user);
     setSessionEstablished(true);
     isSeesionLoginInProgress.current = false;
-   }
+  };
 
   const logout = async () => {
     try {
       await signOut(auth);
       // Clear session cookie on server
-      await fetch('/api/sessionLogout', { method: 'POST' });
+      await fetch("/api/sessionLogout", { method: "POST" });
       setSessionEstablished(false);
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Error signing out:", error);
     }
   };
 
@@ -166,9 +179,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-} 
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}

@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/withAuth';
 import { generateResponse } from '@/lib/openai';
-import type { DecodedIdToken } from 'firebase-admin/auth';
 
 interface ChatRequestBody {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
-export const POST = withAuth(async (req: Request, _user: DecodedIdToken) => {
+export const POST = withAuth(async (req: Request) => {
   try {
     const { messages } = (await req.json()) as ChatRequestBody;
 
