@@ -7,16 +7,18 @@ import {
   GoogleAuthProvider,
   signOut,
 } from "firebase/auth";
-import { auth } from "@/lib/firebaseClient";
+import { auth } from "@/lib/services/firebaseClient";
 import { useRouter, usePathname } from "next/navigation";
+import { type NatalChartData } from "@/lib/services/astroCalculation";
+import { type DestinyCard } from "@/lib/services/destinyCards";
 
 export type AppUser = {
   uid: string;
   email: string;
   name: string;
   photoURL: string;
-  astroDetails: unknown;
-  destinyCard: unknown;
+  astroDetails: NatalChartData;
+  destinyCard: DestinyCard;
   birthData: {
     year: number;
     month: number;

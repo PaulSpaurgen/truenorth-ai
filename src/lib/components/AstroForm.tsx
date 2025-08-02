@@ -229,6 +229,52 @@ export default function AstroForm({ onSubmit, initialData , isLoading = false }:
                 required
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-white mb-1" >
+                Hours
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="23"
+                value={formData.hours}
+                onChange={(e) => handleInputChange('hours', parseInt(e.target.value))}
+                placeholder="HH"
+                className="w-full p-2 border border-gray-700 rounded-md placeholder-gray-400 text-white bg-[#1a1a1a] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white mb-1" >
+                Minutes
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={formData.minutes}
+                onChange={(e) => handleInputChange('minutes', parseInt(e.target.value))}
+                placeholder="MM"
+                className="w-full p-2 border border-gray-700 rounded-md placeholder-gray-400 text-white bg-[#1a1a1a] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white mb-1" >
+                Seconds
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={formData.seconds}
+                onChange={(e) => handleInputChange('seconds', parseInt(e.target.value))}
+                placeholder="SS"
+                className="w-full p-2 border border-gray-700 rounded-md placeholder-gray-400 text-white bg-[#1a1a1a] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
           </div>
 
           <div className="relative location-search-container">

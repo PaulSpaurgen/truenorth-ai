@@ -18,14 +18,17 @@ export function useTabSummary(tab: ChatTab, contextMessage?: string) {
       ? "/api/destiny/summary"
       : "/api/hd/summary";
 
-  const fetchSummary = async (context?: string): Promise<string> => {
+  const fetchSummary = async (context?: string, fetchWithPreviousChats?: boolean): Promise<string> => {
     const res = await fetch(endpoint,  { 
       method: 'POST',
       credentials: "include", 
       headers: { 
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ contextMessage: context || contextMessage || "" })
+      body: JSON.stringify({ 
+        contextMessage: context || contextMessage || "",
+        fetchWithPreviousChats: fetchWithPreviousChats || false
+      })
     });
     const json = await res.json();
     if (!res.ok) {
@@ -37,15 +40,15 @@ export function useTabSummary(tab: ChatTab, contextMessage?: string) {
   const query = useQuery({
     queryKey: ["tabSummary", tab, user?.uid],
     queryFn: () => fetchSummary(),
-    enabled: !!user, // only fetch when authenticated
-    staleTime: 0, // 12h
+    enabled: !!user, 
+    staleTime: 0, 
   });
 
   return {
     ...query,
-    refetch: async () => {
-      // Fetch with current context directly
-      const result = await fetchSummary(contextMessage);
+    refetch: async (fetchWithPreviousChats?: boolean) => {
+      // Fetch with current context and fetchWithPreviousChats parameter
+      const result = await fetchSummary(contextMessage, fetchWithPreviousChats);
       // Update the cache with new data
       queryClient.setQueryData(["tabSummary", tab, user?.uid], result);
       return { data: result, error: null };

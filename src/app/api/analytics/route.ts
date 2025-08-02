@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { withAuth } from '@/lib/withAuth';
-import { dbConnect } from '@/lib/mongodb';
+import { withAuth } from '@/lib/services/withAuth';
+import { dbConnect } from '@/lib/services/mongodb';
 import Message from '@/models/Message';
 
 interface FeedbackItem {

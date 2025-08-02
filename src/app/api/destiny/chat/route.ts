@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server';
-import { withAuth } from '@/lib/withAuth';
-import { generateResponse } from '@/lib/openai';
+import { withAuth } from '@/lib/services/withAuth';
+import { generateResponse } from '@/lib/services/openai';
+import { ChatService } from '@/lib/services/chatService';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import User from '@/models/User';
 
 interface ChatRequestBody {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  sessionId?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const POST = withAuth(async (req: Request, _user: DecodedIdToken) => {
   try {
-    const { messages } = (await req.json()) as ChatRequestBody;
+    const { messages, sessionId } = (await req.json()) as ChatRequestBody;
     if (!messages) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
@@ -23,9 +24,73 @@ export const POST = withAuth(async (req: Request, _user: DecodedIdToken) => {
     const userData = await User.findOne({ uid: _user.uid });
     const aiResponse = await generateResponse(historyPrompt, userData, 'destiny');
 
-    return NextResponse.json({ response: aiResponse });
+    // Add the AI response to messages
+    const updatedMessages = [
+      ...messages,
+      { role: 'assistant' as const, content: aiResponse }
+    ];
+
+    // Save chat session
+    const savedSessionId = await ChatService.saveChatSession(
+      _user.uid,
+      'destiny',
+      updatedMessages,
+      sessionId
+    );
+
+    return NextResponse.json({ 
+      response: aiResponse,
+      sessionId: savedSessionId
+    });
   } catch (error) {
     console.error('Destiny chat error:', error);
     return NextResponse.json({ error: 'Failed to process destiny chat' }, { status: 500 });
+  }
+});
+
+// GET endpoint to retrieve chat sessions
+export const GET = withAuth(async (req: Request, _user: DecodedIdToken) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const sessionId = searchParams.get('sessionId');
+
+    if (sessionId) {
+      // Get specific session
+      const session = await ChatService.getChatSession(_user.uid, 'destiny', sessionId);
+      if (!session) {
+        return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+      }
+      return NextResponse.json({ session });
+    } else {
+      // Get all destiny sessions
+      const sessions = await ChatService.getChatSessions(_user.uid, 'destiny');
+      return NextResponse.json({ sessions });
+    }
+  } catch (error) {
+    console.error('Error fetching destiny chat sessions:', error);
+    return NextResponse.json({ error: 'Failed to fetch chat sessions' }, { status: 500 });
+  }
+});
+
+// DELETE endpoint to delete a chat session
+export const DELETE = withAuth(async (req: Request, _user: DecodedIdToken) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const sessionId = searchParams.get('sessionId');
+
+    if (!sessionId) {
+      return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
+    }
+
+    const deleted = await ChatService.deleteChatSession(_user.uid, 'destiny', sessionId);
+    
+    if (!deleted) {
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Session deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting destiny chat session:', error);
+    return NextResponse.json({ error: 'Failed to delete session' }, { status: 500 });
   }
 }); 

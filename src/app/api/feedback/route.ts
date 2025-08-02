@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { withAuth } from '@/lib/withAuth';
-import { dbConnect } from '@/lib/mongodb';
-import Message from '@/models/Message';
+import { withAuth } from '@/lib/services/withAuth';
+import { dbConnect } from '@/lib/services/mongodb';
+import Message from '@/models/Messages';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 
 /**
@@ -13,9 +13,23 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
 
     const { chatId, type, comment } = await req.json();
 
+    if (!chatId) {
+      return NextResponse.json({ success: false, error: 'No chat session ID provided' }, { status: 400 });
+    }
+
     await dbConnect();
 
-    await Message.findByIdAndUpdate(chatId, {
+    // Find the most recent chat session for this user and chat type
+    const chatSession = await Message.findOne({ 
+      userId: uid,
+      sessionId: chatId 
+    }).sort({ createdAt: -1 });
+
+    if (!chatSession) {
+      return NextResponse.json({ success: false, error: 'Chat session not found' }, { status: 404 });
+    }
+
+    await Message.findByIdAndUpdate(chatSession._id, {
       $push: {
         feedback: {
           userId: uid,

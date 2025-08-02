@@ -164,7 +164,7 @@ export const getDestinyCard = (month: number, day: number): DestinyCard => {
     rank,
     suit,
     suitSymbol,
-    description: `${description} ${rankDescription}`
+    description: `${description} ${rankDescription}`,
   };
 };
 

@@ -1,9 +1,10 @@
-import { dbConnect } from '@/lib/mongodb';
-import { withAuth } from '@/lib/withAuth';
+import { dbConnect } from '@/lib/services/mongodb';
+import { withAuth } from '@/lib/services/withAuth';
 import { NextResponse } from 'next/server';
 import User from '@/models/User';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { getDestinyCard } from '@/lib/destinyCards';
+import { getDestinyCard } from '@/lib/services/destinyCards';
+import { generateNatalChartData, generateNatalChartReport } from '@/lib/services/astroCalculation';
 
 interface AstroData {
   year: number;
@@ -24,33 +25,22 @@ interface AstroData {
 export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
   try {
     const uid = user.uid;
-
     const astroData: AstroData = await req.json();
-    
-    // Make request to Free Astrology API
-    const response = await fetch('https://json.freeastrologyapi.com/planets', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ASTROLOGY_API_KEY || 'YOUR_API_KEY_HERE'
-      },
-      body: JSON.stringify(astroData)
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status: ${response.status}`);
-    }
-
     const destinyCard = getDestinyCard(astroData.month, astroData.date);
-
-    const data = await response.json();
+    const natalChartData = generateNatalChartData(astroData);
+    const natalChartSummary = generateNatalChartReport(astroData);
     const userData = await User.findOne({ uid });
 
-    if (data) {
+    if (natalChartData) {
       await dbConnect();
       await User.updateOne(
         { uid },
-        { $set: { astroDetails: data?.output , destinyCard , birthData: {
+        { $set: { 
+          astroDetails: natalChartData , 
+          astroDetailsAsString: natalChartSummary,
+          destinyCardDetailsAsString: JSON.stringify(destinyCard),
+          destinyCard , 
+          birthData: {
           year: astroData.year,
           month: astroData.month,
           date: astroData.date,
@@ -70,7 +60,7 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
         name: userData?.name,
         email: userData?.email,
         photoURL: userData?.photoURL,
-        astroDetails: data?.output,
+        astroDetails: natalChartData,
         destinyCard: destinyCard,
         birthData: {
           year: astroData.year,

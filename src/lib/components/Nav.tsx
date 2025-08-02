@@ -1,7 +1,7 @@
 "use client";
 import { signOut } from "firebase/auth";
 import { useUser } from "@/lib/hooks/useUser";
-import { auth } from "../firebaseClient";
+import { auth } from "../services/firebaseClient";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Logo from "./Logo";

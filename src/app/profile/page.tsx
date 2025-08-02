@@ -6,27 +6,40 @@ import { motion } from "framer-motion";
 import Modal from "@/lib/components/Modal";
 import { useState } from "react";
 import Image from "next/image";
-import { FaUserAlt } from "react-icons/fa";
+import { FaUserAlt, FaSync } from "react-icons/fa";
+import ChatSessionsTab from "@/lib/components/ChatSessionsTab";
 
 export default function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // const [contextMessage, setContextMessage] = useState("");
-  // const [isRefetching, setIsRefetching] = useState(false);
   const {
     data: astroSummary,
     isLoading: isAstroLoading,
-    // error: astroError,
-    // refetch: refetchAstro,
+    refetch: refetchAstro,
   } = useTabSummary("astrology");
   const {
     data: destinySummary,
     isLoading: isDestinyLoading,
-    // error: destinyError,
-    // refetch: refetchDestiny,
+    refetch: refetchDestiny,
   } = useTabSummary("destiny");
 
   const { user } = useUser();
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Use the hook's refetch functionality with fetchWithPreviousChats context
+      await Promise.all([
+        refetchAstro(true),
+        refetchDestiny(true),
+      ]);
+    } catch (error) {
+      console.error('Error refreshing summaries:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   console.log({ user });
 
@@ -47,6 +60,14 @@ export default function ProfilePage() {
         >
           <FaUserAlt className="text-[#F1C4A5]" />
           View profile data
+        </button>
+        <button
+          className="text-white px-3 py-1 text-xs md:text-sm sm:px-4 sm:py-2 cursor-pointer border text-sm font-light border-gray-600 hover:bg-[#2a4f5c] transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          <FaSync className={`text-[#F1C4A5] ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
@@ -169,69 +190,156 @@ export default function ProfilePage() {
 
           {/* Astrological Data */}
           {user?.astroDetails &&
-          Array.isArray(user.astroDetails) &&
-          user.astroDetails.length > 1 ? (
+          typeof user.astroDetails === "object" &&
+          user.astroDetails.planets ? (
             <div className="bg-[#1A1B1E] border border-gray-700 p-6 rounded-xl">
               <h4 className="font-semibold text-purple-400 mb-4 text-lg">
                 Astrological Data
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(() => {
-                  const zodiacSigns = [
-                    "Aries",
-                    "Taurus",
-                    "Gemini",
-                    "Cancer",
-                    "Leo",
-                    "Virgo",
-                    "Libra",
-                    "Scorpio",
-                    "Sagittarius",
-                    "Capricorn",
-                    "Aquarius",
-                    "Pisces",
-                  ];
-                  const planetsData = user.astroDetails[1] as Record<
-                    string,
-                    {
-                      current_sign?: number;
-                      normDegree?: number;
-                      isRetro?: string;
-                    }
-                  >;
+              
+              {/* Birth Information */}
+              {user.astroDetails.birthInfo && (
+                <div className="mb-6">
+                  <h5 className="text-sm font-medium text-gray-400 mb-2">
+                    Birth Information
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div>
+                      <span className="text-gray-500">Date:</span>
+                      <p className="text-white">{user.astroDetails.birthInfo.date}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Location:</span>
+                      <p className="text-white">
+                        {user.astroDetails.birthInfo.latitude}°N, {user.astroDetails.birthInfo.longitude}°E
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Timezone:</span>
+                      <p className="text-white">
+                        UTC{user.astroDetails.birthInfo.timezone >= 0 ? '+' : ''}{user.astroDetails.birthInfo.timezone}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-                  return Object.keys(planetsData)
-                    .map((key) => {
-                      const planetData = planetsData[key];
-                      if (
-                        planetData &&
-                        planetData.current_sign !== undefined &&
-                        planetData.normDegree !== undefined
-                      ) {
-                        const signName =
-                          zodiacSigns[planetData.current_sign - 1] || "Unknown";
-                        return (
-                          <div
-                            key={key}
-                            className="bg-[#0E1014] border border-gray-600 p-3 rounded-lg"
-                          >
-                            <span className="text-sm font-medium text-gray-400">
-                              {key}:
-                            </span>
-                            <p className="text-sm text-white">
-                              {planetData.normDegree.toFixed(1)}° {signName}
-                              {planetData.isRetro === "true"
-                                ? " (Retrograde)"
-                                : ""}
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })
-                    .filter(Boolean);
-                })()}
+              {/* Planetary Positions */}
+              <div className="mb-6">
+                <h5 className="text-sm font-medium text-gray-400 mb-3">
+                  Planetary Positions
+                </h5>
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                   {Object.entries(user.astroDetails.planets).map(([planetKey, planetData]: [string, {
+                     name: string;
+                     position: {
+                       degrees: number;
+                       minutes: number;
+                       seconds: number;
+                       longitude: number;
+                     };
+                     signName: string;
+                     retrograde: boolean;
+                   }]) => {
+                     if (planetData && planetData.position && planetData.signName) {
+                       return (
+                         <div
+                           key={planetKey}
+                           className="bg-[#0E1014] border border-gray-600 p-3 rounded-lg"
+                         >
+                           <span className="text-sm font-medium text-gray-400">
+                             {planetData.name}:
+                           </span>
+                           <p className="text-sm text-white">
+                             {planetData.position.degrees}°{planetData.position.minutes}&apos;{planetData.position.seconds}&quot; {planetData.signName}
+                             {planetData.retrograde ? " (Retrograde)" : ""}
+                           </p>
+                         </div>
+                       );
+                     }
+                     return null;
+                   }).filter(Boolean)}
+                </div>
               </div>
+
+              {/* Chart Patterns */}
+              {user.astroDetails.chartPatterns && (
+                <div className="mb-6">
+                  <h5 className="text-sm font-medium text-gray-400 mb-3">
+                    Chart Patterns
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {user.astroDetails.chartPatterns.stelliums && user.astroDetails.chartPatterns.stelliums.length > 0 && (
+                      <div>
+                        <span className="text-sm text-gray-500">Stelliums:</span>
+                        <p className="text-sm text-white">
+                          {user.astroDetails.chartPatterns.stelliums.join(', ')}
+                        </p>
+                      </div>
+                    )}
+                    {user.astroDetails.chartPatterns.elementEmphasis && (
+                      <div>
+                        <span className="text-sm text-gray-500">Element Emphasis:</span>
+                        <p className="text-sm text-white">
+                          {Object.entries(user.astroDetails.chartPatterns.elementEmphasis)
+                            .map(([element, count]) => `${element}: ${count}`)
+                            .join(', ')}
+                        </p>
+                      </div>
+                    )}
+                    {user.astroDetails.chartPatterns.qualityEmphasis && (
+                      <div>
+                        <span className="text-sm text-gray-500">Quality Emphasis:</span>
+                        <p className="text-sm text-white">
+                          {Object.entries(user.astroDetails.chartPatterns.qualityEmphasis)
+                            .map(([quality, count]) => `${quality}: ${count}`)
+                            .join(', ')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Interpretations */}
+              {user.astroDetails.interpretations && (
+                <div>
+                  <h5 className="text-sm font-medium text-gray-400 mb-3">
+                    Interpretations
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm text-gray-500">Sun Sign:</span>
+                      <p className="text-sm text-white">{user.astroDetails.interpretations.sunSign}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">Moon Sign:</span>
+                      <p className="text-sm text-white">{user.astroDetails.interpretations.moonSign}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">Rising Sign:</span>
+                      <p className="text-sm text-white">{user.astroDetails.interpretations.risingSign}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">Dominant Elements:</span>
+                      <p className="text-sm text-white">{user.astroDetails.interpretations.dominantElements.join(', ')}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">Dominant Qualities:</span>
+                      <p className="text-sm text-white">{user.astroDetails.interpretations.dominantQualities.join(', ')}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Calculation Timestamp */}
+              {user.astroDetails.calculatedAt && (
+                <div className="mt-4 pt-4 border-t border-gray-600">
+                  <span className="text-xs text-gray-500">
+                    Calculated: {new Date(user.astroDetails.calculatedAt).toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
           ) : null}
 
@@ -255,7 +363,7 @@ export default function ProfilePage() {
       <div className="flex gap-6 mb-8  md:flex-row flex-col   justify-center mt-6 h-fit">
         {/* Astro Summary Box */}
         <motion.div
-          className="h-full w-1/2"
+          className="h-[300px] w-1/2 overflow-y-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
@@ -269,13 +377,13 @@ export default function ProfilePage() {
             <h2 className="md:text-2xl text-xl font-semibold  text-[#F1C4A4] mb-4 flex items-center gap-2">
               Astrology Summary
             </h2>
-            <p className="text-xs md:text-sm leading-relaxed">{astroSummary}</p>
+            <p className="text-xs  leading-relaxed">{astroSummary}</p>
           </div>
         </motion.div>
 
         {/* Destiny Cards Summary Box */}
         <motion.div
-          className="h-full w-1/2"
+          className="h-[300px] w-1/2 overflow-y-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
@@ -289,15 +397,25 @@ export default function ProfilePage() {
             <h2 className="md:text-2xl text-xl font-semibold  text-[#F1C4A4] mb-4 flex items-center gap-2">
               Destiny Cards Summary
             </h2>
-            <p className="text-xs md:text-sm leading-relaxed">
+            <p className="text-xs  leading-relaxed">
               {destinySummary}
             </p>
           </div>
         </motion.div>
       </div>
 
-      {/* Section 2: Chat Interface using existing Chat component */}
-      <div className="rounded-lg shadow-lg p-6 mb-8"></div>
+      {/* Section 2: Previous Chat Sessions */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="rounded-lg shadow-lg p-6 mb-8"
+      >
+        <ChatSessionsTab
+          showTitle={true}
+          className="h-full"
+        />
+      </motion.div>
     </div>
   );
 }

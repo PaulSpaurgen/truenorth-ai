@@ -6,6 +6,11 @@ const UserSchema = new Schema(
     email: { type: String },
     name: String,
     photoURL: String,
+    astroDetailsAsString: String,
+    destinyCardDetailsAsString: String,
+    astroSummary: String,
+    destinySummary: String,
+    profileSummary: String,
     astroDetails: {
       type: Schema.Types.Mixed,
       default: {}

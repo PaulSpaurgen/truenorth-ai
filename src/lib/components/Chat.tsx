@@ -5,13 +5,19 @@ import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTabSummary } from "@/lib/hooks/useTabSummary";
 import { useRef } from "react";
-
+import FeedbackModal from "./FeedbackModal";
+import { FaThumbsUp, FaThumbsDown, FaComment } from "react-icons/fa";
 
 interface Message {
   id: string;
   content: string;
   isUser: boolean;
   timestamp: Date;
+  feedback?: {
+    type: 'like' | 'dislike' | 'correction';
+    comment?: string;
+    submittedAt: Date;
+  };
 }
 
 type ChatTab = 'cosmic' | 'astrology' | 'destiny';
@@ -117,8 +123,6 @@ const CosmicLoading = () => (
   </div>
 );
 
-// MODULE cache no longer needed – handled by React Query
-
 export default function Chat({ activeTab , showMetadata = true , defaultSummary = "" , isSummaryAssistant = true , setContextMessage }: ChatProps) {
   const [user, setUser] = useState<User | null>(null);
   const [messagesMap, setMessagesMap] = useState<Record<ChatTab, Message[]>>({
@@ -126,6 +130,11 @@ export default function Chat({ activeTab , showMetadata = true , defaultSummary 
     astrology: [],
     destiny: [],
   });
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [feedbackModal, setFeedbackModal] = useState<{
+    isOpen: boolean;
+    messageId: string;
+  }>({ isOpen: false, messageId: "" });
 
   const messages = messagesMap[activeTab];
   const hasChatStarted = messages.length > 0;
@@ -146,23 +155,125 @@ export default function Chat({ activeTab , showMetadata = true , defaultSummary 
     return () => unsubscribe();
   }, []);
 
-  // no reset; history preserved automatically
-
   useEffect(() => {
     if (hasChatStarted) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isTyping, hasChatStarted]);
 
+  const handleFeedback = async (type: 'like' | 'dislike' | 'correction', comment?: string) => {
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chatId: currentSessionId,
+          type,
+          comment,
+        }),
+      });
 
+      if (response.ok) {
+        // Update the message with feedback
+        setMessagesMap(prev => ({
+          ...prev,
+          [activeTab]: prev[activeTab].map(msg => 
+            msg.id === feedbackModal.messageId 
+              ? { ...msg, feedback: { type, comment, submittedAt: new Date() } }
+              : msg
+          )
+        }));
+
+        // If it's a correction, add it as a user message to continue the conversation
+        if (type === 'correction' && comment) {
+          const correctionMessage: Message = {
+            id: Date.now().toString() + "-correction",
+            content: `Correction: ${comment}`,
+            isUser: true,
+            timestamp: new Date(),
+          };
+
+          setMessagesMap(prev => ({
+            ...prev,
+            [activeTab]: [...prev[activeTab], correctionMessage]
+          }));
+
+          // Automatically send the correction to get AI response
+          setTimeout(() => {
+            handleCorrectionSubmit();
+          }, 100);
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+    }
+  };
+
+  const handleCorrectionSubmit = async () => {
+    setLoading(true);
+    setTimeout(() => setIsTyping(true), 100);
+
+    try {
+      const tabMap = {
+        cosmic: 'cosmic',
+        astrology: 'astro',
+        destiny: 'destiny',
+      } as const;
+
+      const endpoint = `/api/${tabMap[activeTab]}/chat`;
+
+      // Get the current messages and add the correction
+      const currentMessages = messagesMap[activeTab];
+      const chatHistory = currentMessages.slice(-7).map((m) => ({
+        role: m.isUser ? 'user' : ('assistant' as const),
+        content: m.content + (defaultSummary.length > 0 ? `\n\n${defaultSummary}` : ""),
+      }));
+
+      const body = { 
+        messages: chatHistory,
+        sessionId: currentSessionId 
+      };
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      const aiResponseMessage: Message = {
+        id: Date.now().toString() + "-ai-correction",
+        content: data.response || "Thank you for the correction. I'll take that into account.",
+        isUser: false,
+        timestamp: new Date(),
+      };
+
+      setContextMessage?.([...currentMessages, aiResponseMessage].map((m) => m.content).join("\n"));
+
+      setMessagesMap((prev) => ({ ...prev, [activeTab]: [...prev[activeTab], aiResponseMessage] }));
+      
+    } catch (error) {
+      console.error("Error:", error);
+      const errorResponseMessage: Message = {
+        id: Date.now().toString() + "-error-correction",
+        content: "I apologize, but I seem to have lost my cosmic connection. Please try again.",
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessagesMap((prev) => ({ ...prev, [activeTab]: [...prev[activeTab], errorResponseMessage] }));
+    } finally {
+      setIsTyping(false);
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
-
-    if (!hasChatStarted) {
-      // setHasChatStarted(true); // This line is removed as per the new_code
-    }
 
     setLoading(true);
     const userMessageContent = input;
@@ -213,7 +324,10 @@ export default function Chat({ activeTab , showMetadata = true , defaultSummary 
         content: m.content + (defaultSummary.length > 0 ? `\n\n${defaultSummary}` : ""),
       }));
 
-      const body = { messages: chatHistory };
+      const body = { 
+        messages: chatHistory,
+        sessionId: currentSessionId 
+      };
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -234,7 +348,12 @@ export default function Chat({ activeTab , showMetadata = true , defaultSummary 
       setContextMessage?.([...messages, aiResponseMessage].map((m) => m.content).join("\n"));
 
       setMessagesMap((prev) => ({ ...prev, [activeTab]: [...prev[activeTab], aiResponseMessage] }));
-   
+      
+      // Update session ID if it's a new session
+      if (data.sessionId && !currentSessionId) {
+        setCurrentSessionId(data.sessionId);
+      }
+      
     } catch (error) {
       console.error("Error:", error);
       const errorResponseMessage: Message = {
@@ -266,6 +385,17 @@ export default function Chat({ activeTab , showMetadata = true , defaultSummary 
         return 'Destiny Cards';
       default:
         return 'Cosmic';
+    }
+  };
+
+  const getFeedbackIcon = (type: 'like' | 'dislike' | 'correction') => {
+    switch (type) {
+      case 'like':
+        return <FaThumbsUp className="text-green-500" />;
+      case 'dislike':
+        return <FaThumbsDown className="text-red-500" />;
+      case 'correction':
+        return <FaComment className="text-yellow-500" />;
     }
   };
 
@@ -363,6 +493,29 @@ export default function Chat({ activeTab , showMetadata = true , defaultSummary 
                         {message.content}
                       </p>
                     </motion.div>
+                    
+                    {/* Feedback Section for AI messages */}
+                    {!message.isUser && (
+                      <div className="flex items-center gap-2 mt-2">
+                        {message.feedback ? (
+                          <div className="flex items-center gap-1 text-xs text-gray-400">
+                            {getFeedbackIcon(message.feedback.type)}
+                            <span className="capitalize">{message.feedback.type}</span>
+                            {message.feedback.comment && (
+                              <span className="text-gray-500">• {message.feedback.comment}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setFeedbackModal({ isOpen: true, messageId: message.id })}
+                            className="text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                          >
+                            Rate this response
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    
                     <motion.p
                       className={`text-xs mt-2 ${
                         message.isUser
@@ -423,6 +576,13 @@ export default function Chat({ activeTab , showMetadata = true , defaultSummary 
           </motion.button>
         </motion.form>
       </div>
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal({ isOpen: false, messageId: "" })}
+        onSubmit={handleFeedback}
+      />
     </>
   );
 }
