@@ -2,7 +2,9 @@ import sweph from 'sweph';
 import path from 'path';
 import { utcToJulianEt, zodiacSign, degreesToDms } from './utils';
 
-sweph.set_ephe_path(path.join(__dirname, '/../../eph'));
+const swephPackageDir = path.dirname(require.resolve('sweph'));
+// Point to the ephemeris directory shipped inside the `sweph` package itself.
+sweph.set_ephe_path(path.join(swephPackageDir, 'eph'));
 
 const {
   SE_SUN,

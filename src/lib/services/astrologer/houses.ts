@@ -2,7 +2,10 @@ import sweph from 'sweph';
 import path from 'path';
 import { utcToJulianUt, degreesToDms, zodiacSign } from './utils';
 
-sweph.set_ephe_path(path.join(__dirname, '/../../eph'));
+const swephPackageDir = path.dirname(require.resolve('sweph'));
+// Point Swiss-Ephemeris to its packaged ephemeris files so it works in a
+// serverless bundle.
+sweph.set_ephe_path(path.join(swephPackageDir, 'eph'));
 
 interface Position {
   latitude: number;

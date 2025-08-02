@@ -1,13 +1,17 @@
 import sweph from 'sweph';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-// Get current directory for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-// Set ephemeris path
-const ephPath = path.join(__dirname, '/../../eph');
+// Resolve Swiss Ephemeris data files from the installed `sweph` package so that
+// the ephemeris files are always available in every environment (local, Vercel
+// serverless, etc.). Using `require.resolve` gives us the absolute path to the
+// installed package inside `node_modules`, which is included automatically in
+// the serverless bundle, whereas relative paths like "../../eph" can break
+// after Next.js compiles to `.next/server`.
+const swephPackageDir = path.dirname(require.resolve('sweph'));
+const ephPath = path.join(swephPackageDir, 'eph');
+
+// Point Swiss-Ephemeris at the bundled ephemeris directory.
 sweph.set_ephe_path(ephPath);
 
 interface DmsPosition {
