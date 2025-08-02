@@ -87,21 +87,5 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
   }
 });
 
-// Keep the GET method for backward compatibility
-export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const year = searchParams.get('year');
-    const month = searchParams.get('month');
-    const date = searchParams.get('date');
-    const hours = searchParams.get('hours');
-    const minutes = searchParams.get('minutes');
-    const seconds = searchParams.get('seconds');
-    const latitude = searchParams.get('latitude');
-    const longitude = searchParams.get('longitude');
-    const timezone = searchParams.get('timezone');
-    const observation_point = searchParams.get('observation_point');
-    const ayanamsha = searchParams.get('ayanamsha');
 
-    return NextResponse.json({ year, month, date, hours, minutes, seconds, latitude, longitude, timezone, observation_point, ayanamsha });
-}
 
