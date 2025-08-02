@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/services/withAuth';
 import { dbConnect } from '@/lib/services/mongodb';
-import Message from '@/models/Message';
+import Message from '@/models/Messages';
 
 interface FeedbackItem {
   type: 'like' | 'dislike' | 'correction';
