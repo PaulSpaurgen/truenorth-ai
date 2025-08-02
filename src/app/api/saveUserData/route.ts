@@ -29,10 +29,11 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
     const destinyCard = getDestinyCard(astroData.month, astroData.date);
     const natalChartData = generateNatalChartData(astroData);
     const natalChartSummary = generateNatalChartReport(astroData);
+    
+    await dbConnect();
     const userData = await User.findOne({ uid });
 
     if (natalChartData) {
-      await dbConnect();
       await User.updateOne(
         { uid },
         { $set: { 
@@ -48,7 +49,8 @@ export const POST = withAuth(async (req: Request, user: DecodedIdToken) => {
           minutes: astroData.minutes,
           seconds: astroData.seconds,
           latitude: astroData.latitude,
-          
+          longitude: astroData.longitude,
+          timezone: astroData.timezone,
         } } },
         { upsert: true }
       );
@@ -102,3 +104,4 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ year, month, date, hours, minutes, seconds, latitude, longitude, timezone, observation_point, ayanamsha });
 }
+
