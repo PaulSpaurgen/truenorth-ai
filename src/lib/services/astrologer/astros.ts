@@ -2,7 +2,8 @@ import sweph from 'sweph';
 import path from 'path';
 import { utcToJulianEt, zodiacSign, degreesToDms } from './utils';
 
-const swephPackageDir = path.dirname(require.resolve('sweph'));
+const _require = eval('require');
+const swephPackageDir = path.dirname(_require.resolve('sweph'));
 // Point to the ephemeris directory shipped inside the `sweph` package itself.
 sweph.set_ephe_path(path.join(swephPackageDir, 'eph'));
 

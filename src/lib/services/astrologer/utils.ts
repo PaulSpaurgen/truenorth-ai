@@ -8,7 +8,11 @@ import path from 'path';
 // installed package inside `node_modules`, which is included automatically in
 // the serverless bundle, whereas relative paths like "../../eph" can break
 // after Next.js compiles to `.next/server`.
-const swephPackageDir = path.dirname(require.resolve('sweph'));
+// Use eval to access `require` without allowing Webpack to statically analyse
+// and replace `require.resolve` with a numeric module ID during the build. This
+// keeps the call working both in development and in the serverless runtime.
+const _require = eval('require');
+const swephPackageDir = path.dirname(_require.resolve('sweph'));
 const ephPath = path.join(swephPackageDir, 'eph');
 
 // Point Swiss-Ephemeris at the bundled ephemeris directory.

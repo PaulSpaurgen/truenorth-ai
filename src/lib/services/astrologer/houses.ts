@@ -2,7 +2,8 @@ import sweph from 'sweph';
 import path from 'path';
 import { utcToJulianUt, degreesToDms, zodiacSign } from './utils';
 
-const swephPackageDir = path.dirname(require.resolve('sweph'));
+const _require = eval('require');
+const swephPackageDir = path.dirname(_require.resolve('sweph'));
 // Point Swiss-Ephemeris to its packaged ephemeris files so it works in a
 // serverless bundle.
 sweph.set_ephe_path(path.join(swephPackageDir, 'eph'));
