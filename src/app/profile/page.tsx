@@ -8,6 +8,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { FaUserAlt, FaSync } from "react-icons/fa";
 import ChatSessionsTab from "@/lib/components/ChatSessionsTab";
+import BgLogo from "@/lib/components/BgLogo";
 
 export default function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
@@ -52,6 +53,8 @@ export default function ProfilePage() {
   }
 
   return (
+    <>
+    <BgLogo />
     <div className="max-w-6xl mx-auto p-6 mt-20">
       <div className="flex justify-between items-center">
         <button
@@ -363,7 +366,7 @@ export default function ProfilePage() {
       <div className="flex gap-6 mb-8  md:flex-row flex-col   justify-center mt-6 h-fit">
         {/* Astro Summary Box */}
         <motion.div
-          className="h-[300px] w-1/2 overflow-y-auto"
+          className="h-[300px] w-full overflow-y-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
@@ -383,7 +386,7 @@ export default function ProfilePage() {
 
         {/* Destiny Cards Summary Box */}
         <motion.div
-          className="h-[300px] w-1/2 overflow-y-auto"
+          className="h-[300px] w-full overflow-y-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
@@ -417,5 +420,7 @@ export default function ProfilePage() {
         />
       </motion.div>
     </div>
+    </>
+    
   );
 }
